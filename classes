@@ -68,17 +68,22 @@ class MovableObject:
             else:
                 self.position_y.append(position_y_parameter)
 
-
-
-
     # Function that updates the coordinates of the object in the X axis.
-    def update_position(self, iteration):
-        self.position_x[iteration] += self.position_x_change[iteration]
-        self.position_y[iteration] += self.position_y_change[iteration]
-        game.screen.blit(self.image_path[iteration], (self.position_x[iteration], self.position_y[iteration]))
+    def update_position(self, iteration, path):
+
+        if isinstance(path, list):
+            self.position_x[iteration] += self.position_x_change[iteration]
+            self.position_y[iteration] += self.position_y_change[iteration]
+            game.screen.blit(path[iteration], (self.position_x[iteration], self.position_y[iteration]))
+
+        else:
+            self.position_x[iteration] += self.position_x_change[iteration]
+            self.position_y[iteration] += self.position_y_change[iteration]
+            game.screen.blit(path, (self.position_x[iteration], self.position_y[iteration]))
 
     # Function that moves the ship to the right by 1.8 pixels.
     def move_to_right(self, iteration, change):
+
         # Updating the attribute used to change the X position for the value of the parameter given.
         self.position_x_change[iteration] = change
 
@@ -147,7 +152,6 @@ class Bullet(MovableObject):
     # Function that force the object to follow the player in the X axis.
     def follow_ship(self, iteration, position_x_change, position_y_change):
 
-
         # This line update the value of the bullet at the same position of the ship in the X axis.
         """Remember that the index [-1], calls the last element in the list"""
         self.position_x[iteration] = player.position_x[-1] + position_x_change
@@ -160,11 +164,20 @@ class Bullet(MovableObject):
     def shoot(self, iteration):
         self.position_y_change[iteration] = -30
 
+
 class DestructionSprites(Bullet):
 
-        def __init__(self, quantity, position_x, position_y, position_x_change, position_y_change, visible, frames):
+        def __init__(self, quantity, position_x, position_y, position_x_change, position_y_change, visible, frame01,
+                     frame02, frame03, frame04, frame05, frame06, frame07):
 
-            super().__init__(quantity, position_x, position_y, position_x_change, position_y_change, visible, frames)
+            super().__init__(quantity, position_x, position_y, position_x_change, position_y_change, visible, frame01)
+
+            self.frame02 = frame02
+            self.frame03 = frame03
+            self.frame04 = frame04
+            self.frame05 = frame05
+            self.frame06 = frame06
+            self.frame07 = frame07
 
 
 class Timer:
@@ -193,7 +206,6 @@ class Timer:
     def update_time(self):
 
         self.seconds += 0.1
-
 
 
 class Game:
@@ -227,7 +239,10 @@ class Game:
         # Destruction sprite.
         self.destruction_sprite = DestructionSprites(1,
                             0, 514, 0,
-                            0, False, pygame.image.load('destruction_sprites04.png'))
+                            0, False, pygame.image.load('destruction_sprites04.png'),
+                            pygame.image.load('destruction_sprites01.png'), pygame.image.load('destruction_sprites02.png'),
+                            pygame.image.load('destruction_sprites03.png'), pygame.image.load('destruction_sprites05.png'),
+                            pygame.image.load('destruction_sprites06.png'), pygame.image.load('destruction_sprites07.png'))
 
         # Score attributes.
         self.score_path = Path('best_score.json')
