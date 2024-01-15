@@ -91,7 +91,7 @@ def movable_objects():
 
         # If the bullet attribute "visible" is true, the next block will be executed.
         if not bullet.visible:
-            bullet.follow_ship(iteration)
+            bullet.follow_ship(iteration, 15, 0)
 
             # Destruction sprites
             '''game.destruction_sprite.follow_ship(iteration)'''
