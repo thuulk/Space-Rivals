@@ -1,0 +1,93 @@
+from functions import movable_objects, initialize
+from classes import game, bullet, player, cronometer
+from pygame import mixer
+import pygame
+
+
+
+def running():
+
+    # While this attribute is true execute the next block.
+    while game.execute:
+
+        # Displaying the background image on the screen.
+        game.screen.blit(game.background, (0, 0))
+
+        # for each tick in game execute the next block.
+        for event in pygame.event.get():
+
+            # Close Game
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+            # If a key is pressed, the next block will be executed.
+            if event.type == pygame.KEYDOWN:
+
+                # If the key pressed is right arrow or d, the next block will be executed.
+                if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    for iteration in range(player.quantity):
+                        player.move_to_right(iteration, 3.5)
+
+                # If the key pressed is left arrow or a, the next block will be executed.
+                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                    for iteration in range(player.quantity):
+                        player.move_to_left(iteration, -3.5)
+
+                # If the key pressed is space, the next block will be executed.
+                if event.key == pygame.K_SPACE:
+
+                    for iteration in range(bullet.quantity):
+                        bullet.visible = True
+                        bullet.sound.play()
+                        bullet.shoot(iteration)
+
+            if event.type == pygame.USEREVENT:
+                cronometer.update_time()
+
+        movable_objects()
+        game.show_score()
+        game.show_best_score()
+        game.new_best_score()
+        pygame.display.flip()
+        cronometer.clock.tick(80)
+
+    cronometer.reset()
+    while game.game_over:
+
+
+        mixer.music.stop()
+        game.screen.fill((0, 0, 1))
+
+        for iteration in range(game.destruction_sprite.quantity):
+
+            if cronometer.seconds < 0.2:
+                '''game.destruction_sprite.follow_ship(iteration)
+                game.destruction_sprite.update_position(iteration)'''
+
+            '''if cronometer.milliseconds < 0.5:'''
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+            if event.type == pygame.USEREVENT:
+                cronometer.update_time()
+
+        for iteration in range(player.quantity):
+            player.stand_by(iteration)
+            player.update_position(iteration)
+
+        if cronometer.seconds < 2:
+            player.death_sound.play()
+
+        if cronometer.seconds > 3:
+            game.game_over_text()
+
+        pygame.display.flip()
+
+
+initialize()
+running()
