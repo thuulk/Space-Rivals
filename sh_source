@@ -4,7 +4,7 @@ from pygame import mixer
 import pygame
 
 
-                
+
 def running():
 
     # While this attribute is true execute the next block.
@@ -63,7 +63,7 @@ def running():
 
             if cronometer.seconds < 3:
                 game.destruction_sprite.follow_ship(iteration, -15, 0)
-                game.destruction_sprite.update_position(iteration)
+                game.destruction_sprite.update_position(iteration, game.destruction_sprite.image_path)
 
             '''if cronometer.milliseconds < 0.5:'''
 
