@@ -145,16 +145,16 @@ class Bullet(MovableObject):
         self.sound = mixer.Sound('blaster.mp3')
 
     # Function that force the object to follow the player in the X axis.
-    def follow_ship(self, iteration):
+    def follow_ship(self, iteration, position_x_change, position_y_change):
 
 
         # This line update the value of the bullet at the same position of the ship in the X axis.
         """Remember that the index [-1], calls the last element in the list"""
-        self.position_x[iteration] = player.position_x[-1] + 15
+        self.position_x[iteration] = player.position_x[-1] + position_x_change
 
         # This line update the value of the bullet at the same position of the ship in the Y axis.
         self.position_y[iteration] = 518
-        self.position_y_change[iteration] = 0
+        self.position_y_change[iteration] = position_y_change
 
     # Function that updates the change in the Y axis of the bullet by -30 pixels
     def shoot(self, iteration):
@@ -225,12 +225,9 @@ class Game:
         self.score_font = pygame.font.Font('advanced_pixel_lcd-7.ttf', 20)
 
         # Destruction sprite.
-        self.destruction_sprite = DestructionSprites(7,
+        self.destruction_sprite = DestructionSprites(1,
                             0, 514, 0,
-                            0, False, ['destruction_sprites01.png',
-                            'destruction_sprites02.png', 'destruction_sprites03.png',
-                            'destruction_sprites04.png', 'destruction_sprites05.png',
-                            'destruction_sprites06.png', 'destruction_sprites07.png'])
+                            0, False, pygame.image.load('destruction_sprites04.png'))
 
         # Score attributes.
         self.score_path = Path('best_score.json')
