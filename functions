@@ -1,4 +1,4 @@
-"""Hitboxes and movable objects functions"""
+# Module created to define and store classes of Space_Heroic source code
 
 from classes import game, bullet, enemies, player
 from pygame import mixer
@@ -31,10 +31,9 @@ def movable_objects():
     # Player functions -------------------------------------------------------------------------------------------------
     for iteration in range(player.quantity):
 
-        
         player.update_position(iteration)
 
-        """ If the position in the X axis of the player is 0 or below, the next block will be executed. """
+        # If the position in the X axis of the player is 0 or below, the next block will be executed.
         if player.position_x[iteration] <= 0:
             player.stop_player_left(iteration)
 
@@ -109,4 +108,3 @@ def movable_objects():
 
             # In this Y coordinate, the bullet is hidden by the player sprite.
             bullet.position_y[iteration] = 518
-
