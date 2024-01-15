@@ -163,15 +163,8 @@ class Bullet(MovableObject):
 class DestructionSprites(Bullet):
 
         def __init__(self, quantity, position_x, position_y, position_x_change, position_y_change, visible, frames):
-            
+
             super().__init__(quantity, position_x, position_y, position_x_change, position_y_change, visible, frames)
-
-
-
-
-        
-
-
 
 
 class Timer:
