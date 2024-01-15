@@ -4,7 +4,7 @@ from pygame import mixer
 import pygame
 
 
-
+                
 def running():
 
     # While this attribute is true execute the next block.
@@ -61,9 +61,9 @@ def running():
 
         for iteration in range(game.destruction_sprite.quantity):
 
-            if cronometer.seconds < 0.2:
-                '''game.destruction_sprite.follow_ship(iteration)
-                game.destruction_sprite.update_position(iteration)'''
+            if cronometer.seconds < 3:
+                game.destruction_sprite.follow_ship(iteration, -15, 0)
+                game.destruction_sprite.update_position(iteration)
 
             '''if cronometer.milliseconds < 0.5:'''
 
@@ -76,9 +76,14 @@ def running():
             if event.type == pygame.USEREVENT:
                 cronometer.update_time()
 
-        for iteration in range(player.quantity):
+        '''for iteration in range(player.quantity):
+
             player.stand_by(iteration)
-            player.update_position(iteration)
+            
+            if cronometer.seconds < 2:
+                player.update_position(iteration)'''
+
+
 
         if cronometer.seconds < 2:
             player.death_sound.play()
