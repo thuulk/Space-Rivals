@@ -31,7 +31,7 @@ def movable_objects():
     # Player functions -------------------------------------------------------------------------------------------------
     for iteration in range(player.quantity):
 
-        player.update_position(iteration)
+        player.update_position(iteration, player.image_path)
 
         # If the position in the X axis of the player is 0 or below, the next block will be executed.
         if player.position_x[iteration] <= 0:
@@ -44,7 +44,7 @@ def movable_objects():
     # Enemies functions ------------------------------------------------------------------------------------------------
     for enemy in range(enemies.quantity):
 
-        enemies.update_position(enemy)
+        enemies.update_position(enemy, enemies.image_path)
 
         # Updating the position of the enemy
         if enemies.position_x[enemy] >= 736:
@@ -61,7 +61,7 @@ def movable_objects():
 
         # Collisions ---------------------------------------------------------------------------------------------------
         for iteration in range(bullet.quantity):
-            enemies.update_position(enemy)
+            enemies.update_position(enemy, enemies.image_path)
 
             # Collision between the bullet and the enemy and between the player and the enemy.
             collision_bullet_n_enemy = hitbox(enemies.position_x[enemy], enemies.position_y[enemy],
@@ -99,10 +99,16 @@ def movable_objects():
 
         # If the bullet attribute "visible" is not true, the next block will be executed.
         if bullet.visible:
-            bullet.update_position(iteration)
+            bullet.update_position(iteration, bullet.image_path)
 
 
         # If bullet position in the Y axis is below -64 pixels, the next block will be executed.
+        if bullet.position_y[iteration] <= -64:
+            bullet.visible = False
+
+            # In this Y coordinate, the bullet is hidden by the player sprite.
+            bullet.position_y[iteration] = 518
+            
         if bullet.position_y[iteration] <= -64:
             bullet.visible = False
 
