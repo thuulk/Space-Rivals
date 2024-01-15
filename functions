@@ -1,0 +1,112 @@
+"""Hitboxes and movable objects functions"""
+
+from classes import game, bullet, enemies, player
+from pygame import mixer
+import pygame
+import math
+
+
+def initialize():
+
+    pygame.init()
+    pygame.mixer.init()
+    mixer.music.load('corneria.mp3')
+    mixer.music.set_volume(1)
+    mixer.music.play(-1)
+
+# Hitbox function
+def hitbox(position_x_1, position_y_1, position_x_2, position_y_2, distance_pixels):
+
+    bullet_n_enemy_distance = math.sqrt(math.pow(position_x_1 - position_x_2, 2) +
+                                        math.pow(position_y_1 - position_y_2, 2))
+
+    if bullet_n_enemy_distance < distance_pixels:
+        return True
+
+    else:
+        return False
+
+def movable_objects():
+
+    # Player functions -------------------------------------------------------------------------------------------------
+    for iteration in range(player.quantity):
+
+        
+        player.update_position(iteration)
+
+        """ If the position in the X axis of the player is 0 or below, the next block will be executed. """
+        if player.position_x[iteration] <= 0:
+            player.stop_player_left(iteration)
+
+        # If the position in the X axis of the player is 0 or below, the next block will be executed.
+        if player.position_x[iteration] >= 734:
+            player.stop_player_right(iteration)
+
+    # Enemies functions ------------------------------------------------------------------------------------------------
+    for enemy in range(enemies.quantity):
+
+        enemies.update_position(enemy)
+
+        # Updating the position of the enemy
+        if enemies.position_x[enemy] >= 736:
+            enemies.move_to_left(enemy, -1.5)
+            enemies.move_down(enemy)
+
+        if enemies.position_x[enemy] <= 0:
+            enemies.move_to_right(enemy, 1.5)
+            enemies.move_down(enemy)
+
+        if enemies.position_y[enemy] >= 550:
+            game.game_over = True
+            game.execute = False
+
+        # Collisions ---------------------------------------------------------------------------------------------------
+        for iteration in range(bullet.quantity):
+            enemies.update_position(enemy)
+
+            # Collision between the bullet and the enemy and between the player and the enemy.
+            collision_bullet_n_enemy = hitbox(enemies.position_x[enemy], enemies.position_y[enemy],
+                                              bullet.position_x[iteration], bullet.position_y[iteration], 27)
+
+            # Collision between the bullet and the enemy and between the player and the enemy.
+            collision_player_n_enemy = hitbox(enemies.position_x[enemy], enemies.position_y[enemy],
+                                                             player.position_x[iteration], player.position_y[iteration], 60)
+
+            # If there is a collision between the bullet and an enemy, the next block will be executed.
+            if collision_bullet_n_enemy:
+                game.destruction_sound.stop()
+                game.destruction_sound.play()
+                game.update_score()
+                enemies.regenerate(enemy)
+                bullet.visible = False
+
+
+            if collision_player_n_enemy:
+
+                game.execute = False
+                game.game_over = True
+
+
+    # Bullet functions -------------------------------------------------------------------------------------------------
+    for iteration in range(bullet.quantity):
+
+        # If the bullet attribute "visible" is true, the next block will be executed.
+        if not bullet.visible:
+            bullet.follow_ship(iteration)
+
+            # Destruction sprites
+            '''game.destruction_sprite.follow_ship(iteration)'''
+
+
+        # If the bullet attribute "visible" is not true, the next block will be executed.
+        if bullet.visible:
+            bullet.update_position(iteration)
+
+
+        # If bullet position in the Y axis is below -64 pixels, the next block will be executed.
+        if bullet.position_y[iteration] <= -64:
+            bullet.visible = False
+
+            # In this Y coordinate, the bullet is hidden by the player sprite.
+            bullet.position_y[iteration] = 518
+
