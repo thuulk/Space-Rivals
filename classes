@@ -24,11 +24,11 @@ class MovableObject:
         self.image_path_parameter = image_path_parameter
         self.image_path = []
 
-        # X initial position.
+        # Initial X position.
         self.position_x_parameter = position_x_parameter
         self.position_x = []
 
-        # Y initial position.
+        # Initial Y position.
         self.position_y_parameter = position_y_parameter
         self.position_y = []
 
@@ -98,9 +98,16 @@ class Player(MovableObject):
 
     # Function that initializes the attributes of this class.
     def __init__(self):
-        super().__init__(1, 368, 518,
-                         0, 0, pygame.image.load('nave.png'))
 
+        """
+        super(). calls a function from the parent class, in this case "__init__". So, what function __init__
+        from player class does, is call the function __init__ from its parent class. Summarizing, __init__
+        function from player class is the same as the parent __init__ function.
+        """
+        super().__init__(1, 368, 518,
+                         0, 0, pygame.image.load('sprites_player0.png'))
+
+        self.frame02 = pygame.image.load('sprites_player1.png')
         self.death_sound = mixer.Sound('death_sound_effect.mp3')
         self.death_sound.set_volume(0.7)
 
@@ -121,6 +128,14 @@ class Player(MovableObject):
         # Setting the limit for the player in the screen on the left side.
         self.position_x[iteration] = 0
 
+    def update_position(self, iteration):
+
+        if cronometer.seconds % 1 == 0:
+            super().update_position(iteration, self.image_path)
+
+        else:
+            super().update_position(iteration, self.frame02)
+
 
 class Enemy(MovableObject):
 
@@ -133,9 +148,9 @@ class Enemy(MovableObject):
         self.position_y[enemy] += self.position_y_change[enemy]
 
     # Function that give a new random coordinates to the enemy within the given parameters below.
-    def regenerate(self, enemy):
+    def regenerate(self, enemy, range_in_y):
         self.position_x[enemy] = random.randint(0, 736)
-        self.position_y[enemy] = random.randint(0, 200)
+        self.position_y[enemy] = random.randint(0, range_in_y)
 
 
 class Bullet(MovableObject):
@@ -162,22 +177,20 @@ class Bullet(MovableObject):
 
     # Function that updates the change in the Y axis of the bullet by -30 pixels
     def shoot(self, iteration):
-        self.position_y_change[iteration] = -30
+        self.position_y_change[iteration] = -16
 
 
 class DestructionSprites(Bullet):
 
-        def __init__(self, quantity, position_x, position_y, position_x_change, position_y_change, visible, frame01,
-                     frame02, frame03, frame04, frame05, frame06, frame07):
+    # Function that initializes the attributes of this class.
+    def __init__(self, quantity, position_x, position_y, position_x_change, position_y_change, visible, frame01,
+                 frame02, frame03, frame04):
 
-            super().__init__(quantity, position_x, position_y, position_x_change, position_y_change, visible, frame01)
+        super().__init__(quantity, position_x, position_y, position_x_change, position_y_change, visible, frame01)
 
-            self.frame02 = frame02
-            self.frame03 = frame03
-            self.frame04 = frame04
-            self.frame05 = frame05
-            self.frame06 = frame06
-            self.frame07 = frame07
+        self.frame02 = frame02
+        self.frame03 = frame03
+        self.frame04 = frame04
 
 
 class Timer:
@@ -193,61 +206,85 @@ class Timer:
         # Variable that will be used for the count the seconds in the self.clock attribute.
         self.seconds = 0
 
-        self.font = pygame.font.Font('advanced_pixel_lcd-7.ttf', 10)
-
-        pygame.time.set_timer(pygame.USEREVENT, 100)
+        pygame.time.set_timer(pygame.USEREVENT, 1)
 
     # Function that resets the timer.
     def reset(self):
 
         self.seconds = 0
 
-    # function that updates the timer by .1 second.
+    # function that updates the timer by .001 second.
     def update_time(self):
 
-        self.seconds += 0.1
+        self.seconds += 0.001
 
 
-class Game:
+class Menu:
 
-    # Function that initializes the attributes of this class.
-    def __init__(self):
+    def __init__(self, execute, title_font, color, option_color):
 
-        # Screen dimentions.
+        # Bool that will determine if the game will keep running
         self.screen = pygame.display.set_mode((800, 600))
-
-        # Game icon.
-        self.icon = pygame.image.load('missile.png')
 
         # Screen background.
         self.background = pygame.image.load('fondo.png')
 
-        # Bool that will determine if the game will keep running.
-        self.execute = True
+        # Bool that will determine if the menu will keep running
+        self.execute = execute
 
-        # Bool that will determine if the game ends.
-        self.game_over = False
+        # Font
+        self.title_font = title_font
+        self.option_font = pygame.font.Font('advanced_pixel_lcd-7.ttf', 20)
+
+        # Font color
+        self.color = color
+        self.play_color = option_color
+        self.quit_color = color
+
+    def display_text(self, font, message, position_x, position_y, color):
+        text = font.render(message, True, color)
+        game.screen.blit(text, (position_x, position_y))
+
+
+class Game(Menu):
+
+    # Function that initializes the attributes of this class.
+    def __init__(self, execute, font, color, option_color):
+
+        super().__init__(execute, font,  color, option_color)
+
+        # Game icon.
+        self.icon = pygame.image.load('missile.png')
+
+        # Attribute that will determine if what section of the game will run.
+        self.over = False
+        self.reset = True
 
         # Destruction sound of enemy ships.
         self.destruction_sound = mixer.Sound('destruccion.mp3.mp3')
         self.destruction_sound.set_volume(0.8)
 
         # Storing the size and font of different texts displayed.
-        self.final_font = pygame.font.Font('advanced_pixel_lcd-7.ttf', 40)
         self.score_font = pygame.font.Font('advanced_pixel_lcd-7.ttf', 20)
 
         # Destruction sprite.
-        self.destruction_sprite = DestructionSprites(1,
-                            0, 514, 0,
-                            0, False, pygame.image.load('destruction_sprites04.png'),
-                            pygame.image.load('destruction_sprites01.png'), pygame.image.load('destruction_sprites02.png'),
-                            pygame.image.load('destruction_sprites03.png'), pygame.image.load('destruction_sprites05.png'),
-                            pygame.image.load('destruction_sprites06.png'), pygame.image.load('destruction_sprites07.png'))
+        self.destruction_sprite = DestructionSprites(1, 0, 514, 0,
+                                                     0, False,
+                                                     pygame.image.load('destruction_sprites01.png'),
+                                                     pygame.image.load('destruction_sprites02.png'),
+                                                     pygame.image.load('destruction_sprites03.png'),
+                                                     pygame.image.load('destruction_sprites04.png'))
+
+        self.menu = Menu(True, pygame.font.Font('advanced_pixel_lcd-7.ttf', 40),
+                         (255, 255, 255), (87, 35, 100))
 
         # Score attributes.
         self.score_path = Path('best_score.json')
         self.best_score = 0
         self.score = 0
+
+        # Keys pressed.
+        self.keys = pygame.key.get_pressed()
 
     # Function that displays the current player's score.
     def show_score(self):
@@ -283,20 +320,20 @@ class Game:
         self.score += 10
 
     # Function that displays the game over text.
-    def game_over_text(self):
-        final_text = self.final_font.render("Game Over", True, (255, 255, 255))
-        self.screen.blit(final_text, (200, 200))
+    def game_over_text(self, font, message, position_x, position_y, color):
+        super().display_text(font, message, position_x, position_y, color)
 
 
-game = Game()
+game = Game(True, pygame.font.Font('advanced_pixel_lcd-7.ttf', 40), (255, 255, 255),
+            (87, 35, 100))
 player = Player()
 enemies = Enemy(7,
                 [random.randint(0, 736) for enemy in range(9)],
                 [random.randint(0, 200) for enemy in range(9)],
-                1.5, 0.3, pygame.image.load('space-ship.png'))
+                0.8, 0.1, pygame.image.load('space-ship.png'))
 
 bullet = Bullet(1,
                 0, 518, 0,
-                0, False, pygame.image.load('bala.png'))
+                0, False, pygame.image.load('laser_player.png'))
 
 cronometer = Timer()
