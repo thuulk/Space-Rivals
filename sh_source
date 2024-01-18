@@ -1,97 +1,43 @@
-from functions import movable_objects, initialize
-from classes import game, bullet, player, cronometer
-from pygame import mixer
+from functions import movable_objects, initialize, game_over, in_game_inputs, game_menu, reinitialize_music
+from classes import game, cronometer
 import pygame
-
 
 
 def running():
 
-    # While this attribute is true execute the next block.
-    while game.execute:
+    # Setting the frame rate in which the screen updates.
+    cronometer.clock.tick(60)
 
-        # Displaying the background image on the screen.
-        game.screen.blit(game.background, (0, 0))
+    while game.reset:
 
-        # for each tick in game execute the next block.
-        for event in pygame.event.get():
+        # While this attribute is true, the next block will be executed.
+        while game.menu.execute:
 
-            # Close Game
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+            game_menu()
 
-            # If a key is pressed, the next block will be executed.
-            if event.type == pygame.KEYDOWN:
+        reinitialize_music()
+        cronometer.reset()
 
-                # If the key pressed is right arrow or d, the next block will be executed.
-                if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                    for iteration in range(player.quantity):
-                        player.move_to_right(iteration, 3.5)
+        # While this attribute is true execute the next block.
+        while game.execute:
 
-                # If the key pressed is left arrow or a, the next block will be executed.
-                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                    for iteration in range(player.quantity):
-                        player.move_to_left(iteration, -3.5)
+            # Displaying the background image on the screen.
+            game.screen.blit(game.background, (0, 0))
 
-                # If the key pressed is space, the next block will be executed.
-                if event.key == pygame.K_SPACE:
+            # These are all the functions that make the game work.
+            in_game_inputs()
+            movable_objects()
+            game.show_score()
+            game.show_best_score()
+            game.new_best_score()
 
-                    for iteration in range(bullet.quantity):
-                        bullet.visible = True
-                        bullet.sound.play()
-                        bullet.shoot(iteration)
+            # Updating the screen.
+            pygame.display.flip()
 
-            if event.type == pygame.USEREVENT:
-                cronometer.update_time()
+        cronometer.reset()
+        while game.over:
 
-        movable_objects()
-        game.show_score()
-        game.show_best_score()
-        game.new_best_score()
-        pygame.display.flip()
-        cronometer.clock.tick(80)
-
-    cronometer.reset()
-    while game.game_over:
-
-
-        mixer.music.stop()
-        game.screen.fill((0, 0, 1))
-
-        for iteration in range(game.destruction_sprite.quantity):
-
-            if cronometer.seconds < 3:
-                game.destruction_sprite.follow_ship(iteration, -15, 0)
-                game.destruction_sprite.update_position(iteration, game.destruction_sprite.image_path)
-
-            '''if cronometer.milliseconds < 0.5:'''
-
-        for event in pygame.event.get():
-
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-
-            if event.type == pygame.USEREVENT:
-                cronometer.update_time()
-
-        '''for iteration in range(player.quantity):
-
-            player.stand_by(iteration)
-            
-            if cronometer.seconds < 2:
-                player.update_position(iteration)'''
-
-
-
-        if cronometer.seconds < 2:
-            player.death_sound.play()
-
-        if cronometer.seconds > 3:
-            game.game_over_text()
-
-        pygame.display.flip()
+            game_over()
 
 
 initialize()
