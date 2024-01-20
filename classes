@@ -281,11 +281,6 @@ class Game(Menu):
         self.best_score = 0
         self.score = 0
 
-        # "Texts"
-        self.texts = ["Try Again", "Quit"]
-        self.colors = [(255, 255, 255), (87, 35, 100)]
-        self.text_index = 0
-
     # Function that displays the current player's score.
     def show_score(self):
 
