@@ -1,6 +1,6 @@
 # Module created to define and store classes of Space_Heroic source code
 
-from classes import game, bullet, enemies, player, cronometer
+from classes import game, bullet, enemies, player, timer
 from pygame import mixer
 import pygame
 import math
@@ -9,10 +9,26 @@ import math
 def initialize():
 
     pygame.init()
+
+    # Initialize music and main theme
     pygame.mixer.init()
     mixer.music.load('corneria.mp3')
     mixer.music.set_volume(1)
     mixer.music.play(-1)
+
+    # Setting the frame rate in which the screen updates.
+    timer.clock.tick(60)
+
+    # Respawning enemies and player
+    for enemy in range(enemies.quantity):
+        enemies.regenerate(enemy, 200)
+
+    for iteration in range(player.quantity):
+        player.regenerate_object(iteration, 368, 518)
+        bullet.position_y_change[iteration] = 0
+
+    # Resetting score
+    game.score = 0
 
 
 def reinitialize_music():
@@ -36,9 +52,9 @@ def hitbox(position_x_1, position_y_1, position_x_2, position_y_2, distance_pixe
 
 def game_menu():
     game.screen.blit(game.background, (0, 0))
-    game.menu.display_text(game.menu.title_font, "Space Invaders", 100, 200, game.menu.color)
-    game.menu.display_text(game.menu.option_font, "Play", 160, 300, game.menu.play_color)
-    game.menu.display_text(game.menu.option_font, "Quit", 160, 400, game.menu.quit_color)
+    game.menu.display_text(game.menu.title_font, "Space Invaders", 100, 200, game.menu.default_color)
+    game.menu.display_text(game.menu.option_font, "Play", 145, 350, game.menu.play_color)
+    game.menu.display_text(game.menu.option_font, "Quit", 145, 400, game.menu.exit_color)
 
     for event in pygame.event.get():
 
@@ -50,16 +66,16 @@ def game_menu():
 
             if event.key == pygame.K_UP or event.key == pygame.K_w:
                 game.menu.play_color = (87, 35, 100)
-                game.menu.quit_color = (255, 255, 255)
+                game.menu.exit_color = (255, 255, 255)
 
             if event.key == pygame.K_DOWN or event.key == pygame.K_s:
                 game.menu.play_color = (255, 255, 255)
-                game.menu.quit_color = (87, 35, 100)
+                game.menu.exit_color = (87, 35, 100)
 
             if event.key == pygame.K_RETURN and game.menu.play_color == (87, 35, 100):
                 game.menu.execute = False
 
-            if event.key == pygame.K_RETURN and game.menu.quit_color == (87, 35, 100):
+            if event.key == pygame.K_RETURN and game.menu.exit_color == (87, 35, 100):
                 pygame.quit()
                 exit()
 
@@ -99,7 +115,7 @@ def in_game_inputs():
                     bullet.shoot(iteration)
 
         if event.type == pygame.USEREVENT:
-            cronometer.update_time()
+            timer.update_time()
 
 
 def movable_objects():
@@ -107,7 +123,7 @@ def movable_objects():
     # Player functions -------------------------------------------------------------------------------------------------
     for iteration in range(player.quantity):
 
-        player.update_position(iteration)
+        player.update_position(iteration, player.image_path)
 
         # If the position in the X axis of the player is 0 or below, the next block will be executed.
         if player.position_x[iteration] <= 0:
@@ -191,6 +207,37 @@ def game_over():
     mixer.music.stop()
     game.screen.fill((0, 0, 0))
 
+    for iteration in range(game.destruction_sprite.quantity):
+
+        player.stand_by(iteration)
+        game.destruction_sprite.follow_ship(iteration, 0, 0)
+
+        if timer.seconds < 0.39:
+            player.update_position(iteration, player.image_path)
+
+        if timer.seconds <= 0.08:
+            game.destruction_sprite.update_position(iteration, game.destruction_sprite.image_path)
+
+        if 0.08 < timer.seconds <= 0.16:
+            game.destruction_sprite.update_position(iteration, game.destruction_sprite.frame02)
+
+        if 0.16 < timer.seconds <= 0.24:
+            game.destruction_sprite.update_position(iteration, game.destruction_sprite.frame03)
+
+        if 0.24 < timer.seconds <= 0.4:
+            game.destruction_sprite.update_position(iteration, game.destruction_sprite.frame04)
+
+    if timer.seconds < 1.5:
+        player.death_sound.play()
+
+    if timer.seconds > 2:
+        game.game_over_text(game.title_font, "Game Over", 200, 200, game.default_color)
+
+    if timer.seconds > 3:
+
+        game.display_text(game.option_font, "Try Again", 160, 300, game.play_color)
+        game.display_text(game.option_font, "Exit", 160, 340, game.exit_color)
+
     for event in pygame.event.get():
 
         if event.type == pygame.QUIT:
@@ -198,67 +245,26 @@ def game_over():
             exit()
 
         if event.type == pygame.USEREVENT:
-            cronometer.update_time()
+            timer.update_time()
 
-    for iteration in range(game.destruction_sprite.quantity):
+        if event.type == pygame.KEYDOWN:
 
-        player.stand_by(iteration)
-        game.destruction_sprite.follow_ship(iteration, 0, 0)
+            if event.key == pygame.K_UP or event.key == pygame.K_w:
+                game.play_color = (87, 35, 100)
+                game.exit_color = (255, 255, 255)
 
-        if cronometer.seconds < 0.39:
-            player.update_position(iteration)
+            if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                game.play_color = (255, 255, 255)
+                game.exit_color = (87, 35, 100)
 
-        if cronometer.seconds <= 0.08:
-            game.destruction_sprite.update_position(iteration, game.destruction_sprite.image_path)
+            if event.key == pygame.K_RETURN and game.play_color == (87, 35, 100):
+                game.reset = True
+                game.execute = True
+                game.menu.execute = False
+                game.over = False
 
-        if 0.08 < cronometer.seconds <= 0.16:
-            game.destruction_sprite.update_position(iteration, game.destruction_sprite.frame02)
-
-        if 0.16 < cronometer.seconds <= 0.24:
-            game.destruction_sprite.update_position(iteration, game.destruction_sprite.frame03)
-
-        if 0.24 < cronometer.seconds <= 0.4:
-            game.destruction_sprite.update_position(iteration, game.destruction_sprite.frame04)
-
-    if cronometer.seconds < 1.5:
-        player.death_sound.play()
-
-    if cronometer.seconds > 2:
-        game.game_over_text(game.title_font, "Game Over", 200, 200, game.color)
-        '''game.menu.display_text(game.menu.option_font, "Try again", 160, 360, game.menu.play_color)
-        game.menu.display_text(game.menu.option_font, "Quit", 160, 400, game.menu.quit_color)
-
-        for event in pygame.event.get():
-
-            if event.type == pygame.KEYDOWN:
-
-                if event.type == pygame.QUIT:
-                        pygame.quit()
-                        exit()
-
-                if event.key == pygame.K_UP or event.key == pygame.K_w:
-                        game.menu.play_color = (87, 35, 100)
-                        game.menu.quit_color = (255, 255, 255)
-
-                if event.key == pygame.K_DOWN or event.key == pygame.K_s:
-                        game.menu.play_color = (255, 255, 255)
-                        game.menu.quit_color = (87, 35, 100)
-
-                if event.key == pygame.K_RETURN and game.menu.play_color == (87, 35, 100):
-
-                    game.over = False
-                    game.reset = True
-
-                if event.key == pygame.K_RETURN and game.menu.quit_color == (87, 35, 100):
-                    game.over = False
-                    game.reset = False
-
-            if event.type == pygame.KEYUP:
-
-                if event.key == pygame.K_UP or event.key == pygame.K_w or event.key == pygame.K_DOWN or event.key == pygame.K_s or event.key == pygame.K_RETURN:
-                    pass
-'''
-
+            if event.key == pygame.K_RETURN and game.exit_color == (87, 35, 100):
+                pygame.quit()
+                exit()
 
     pygame.display.flip()
-
