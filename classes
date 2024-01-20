@@ -93,19 +93,22 @@ class MovableObject:
         # Updating the attribute used to change the X position for the value of the parameter given.
         self.position_x_change[iteration] = change
 
+    def regenerate_object(self, iteration, position_x, position_y):
+        self.position_x[iteration] = position_x
+        self.position_y[iteration] = position_y
+
 
 class Player(MovableObject):
 
     # Function that initializes the attributes of this class.
-    def __init__(self):
+    def __init__(self, quantity, position_x, position_y, position_x_change, position_y_change, image):
 
         """
         super(). calls a function from the parent class, in this case "__init__". So, what function __init__
         from player class does, is call the function __init__ from its parent class. Summarizing, __init__
         function from player class is the same as the parent __init__ function.
         """
-        super().__init__(1, 368, 518,
-                         0, 0, pygame.image.load('sprites_player0.png'))
+        super().__init__(quantity, position_x, position_y, position_x_change, position_y_change, image)
 
         self.frame02 = pygame.image.load('sprites_player1.png')
         self.death_sound = mixer.Sound('death_sound_effect.mp3')
@@ -127,14 +130,6 @@ class Player(MovableObject):
 
         # Setting the limit for the player in the screen on the left side.
         self.position_x[iteration] = 0
-
-    def update_position(self, iteration):
-
-        if cronometer.seconds % 1 == 0:
-            super().update_position(iteration, self.image_path)
-
-        else:
-            super().update_position(iteration, self.frame02)
 
 
 class Enemy(MovableObject):
@@ -177,7 +172,7 @@ class Bullet(MovableObject):
 
     # Function that updates the change in the Y axis of the bullet by -30 pixels
     def shoot(self, iteration):
-        self.position_y_change[iteration] = -16
+        self.position_y_change[iteration] = -12
 
 
 class DestructionSprites(Bullet):
@@ -237,9 +232,12 @@ class Menu:
         self.option_font = pygame.font.Font('advanced_pixel_lcd-7.ttf', 20)
 
         # Font color
-        self.color = color
+        self.default_color = color
         self.play_color = option_color
-        self.quit_color = color
+        self.exit_color = color
+        self.try_again = color
+
+        ''' self.option_color = option_color'''
 
     def display_text(self, font, message, position_x, position_y, color):
         text = font.render(message, True, color)
@@ -283,8 +281,10 @@ class Game(Menu):
         self.best_score = 0
         self.score = 0
 
-        # Keys pressed.
-        self.keys = pygame.key.get_pressed()
+        # "Texts"
+        self.texts = ["Try Again", "Quit"]
+        self.colors = [(255, 255, 255), (87, 35, 100)]
+        self.text_index = 0
 
     # Function that displays the current player's score.
     def show_score(self):
@@ -326,14 +326,15 @@ class Game(Menu):
 
 game = Game(True, pygame.font.Font('advanced_pixel_lcd-7.ttf', 40), (255, 255, 255),
             (87, 35, 100))
-player = Player()
+
+player = Player(1, 368, 518, 0, 0, pygame.image.load('sprites_player0.png'))
 enemies = Enemy(7,
                 [random.randint(0, 736) for enemy in range(9)],
                 [random.randint(0, 200) for enemy in range(9)],
-                0.8, 0.1, pygame.image.load('space-ship.png'))
+                0.8, 0.13, pygame.image.load('space-ship.png'))
 
 bullet = Bullet(1,
                 0, 518, 0,
                 0, False, pygame.image.load('laser_player.png'))
 
-cronometer = Timer()
+timer = Timer()
