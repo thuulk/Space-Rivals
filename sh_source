@@ -1,14 +1,13 @@
 from functions import movable_objects, initialize, game_over, in_game_inputs, game_menu, reinitialize_music
-from classes import game, cronometer
+from classes import game, timer
 import pygame
 
 
 def running():
 
-    # Setting the frame rate in which the screen updates.
-    cronometer.clock.tick(60)
-
     while game.reset:
+
+        initialize()
 
         # While this attribute is true, the next block will be executed.
         while game.menu.execute:
@@ -16,7 +15,7 @@ def running():
             game_menu()
 
         reinitialize_music()
-        cronometer.reset()
+        timer.reset()
 
         # While this attribute is true execute the next block.
         while game.execute:
@@ -34,12 +33,10 @@ def running():
             # Updating the screen.
             pygame.display.flip()
 
-        cronometer.reset()
+        timer.reset()
         while game.over:
 
             game_over()
 
 
-initialize()
 running()
-
