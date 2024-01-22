@@ -25,11 +25,11 @@ class MovableObject:
         self.image_path = []
 
         # Initial X position.
-        self.position_x_parameter = position_x_parameter
+        self.initial_position_x_parameter = position_x_parameter
         self.position_x = []
 
         # Initial Y position.
-        self.position_y_parameter = position_y_parameter
+        self.initial_position_y_parameter = position_y_parameter
         self.position_y = []
 
         # Attribute that will indicate the change in the X position.
@@ -71,6 +71,7 @@ class MovableObject:
     # Function that updates the coordinates of the object in the X axis.
     def update_position(self, iteration, path):
 
+
         if isinstance(path, list):
             self.position_x[iteration] += self.position_x_change[iteration]
             self.position_y[iteration] += self.position_y_change[iteration]
@@ -93,99 +94,36 @@ class MovableObject:
         # Updating the attribute used to change the X position for the value of the parameter given.
         self.position_x_change[iteration] = change
 
-    def regenerate_object(self, iteration, position_x, position_y):
+    '''def regenerate_object(self, iteration, position_x, position_y):
         self.position_x[iteration] = position_x
         self.position_y[iteration] = position_y
-
-
-class Player(MovableObject):
-
-    # Function that initializes the attributes of this class.
-    def __init__(self, quantity, position_x, position_y, position_x_change, position_y_change, image):
-
-        """
-        super(). calls a function from the parent class, in this case "__init__". So, what function __init__
-        from player class does, is call the function __init__ from its parent class. Summarizing, __init__
-        function from player class is the same as the parent __init__ function.
-        """
-        super().__init__(quantity, position_x, position_y, position_x_change, position_y_change, image)
-
-        self.frame02 = pygame.image.load('sprites_player1.png')
-        self.death_sound = mixer.Sound('death_sound_effect.mp3')
-        self.death_sound.set_volume(0.7)
-
-    def stand_by(self, iteration):
-
-        # Updating the attribute to NOT change the X position of the player.
-        self.position_x_change[iteration] = 0
-
-    # Function that limits player movement within the screen limitations
-    def stop_player_right(self, iteration):
-
-        # Setting the limit for the player in the screen on the right side.
-        self.position_x[iteration] = 734
-
-    # Function that limits player movement within the screen limitations
-    def stop_player_left(self, iteration):
-
-        # Setting the limit for the player in the screen on the left side.
-        self.position_x[iteration] = 0
-
-
-class Enemy(MovableObject):
-
-    # Function that initializes the attributes of this class.
-    def __init__(self, quantity, position_x, position_y, position_x_change, position_y_change, image):
-        super().__init__(quantity, position_x, position_y, position_x_change, position_y_change, image)
-
-    # Function that updates the current Y axis coordinates by 0.3 pixels every time it is called
-    def move_down(self, enemy):
-        self.position_y[enemy] += self.position_y_change[enemy]
-
+        '''
     # Function that give a new random coordinates to the enemy within the given parameters below.
-    def regenerate(self, enemy, range_in_y):
-        self.position_x[enemy] = random.randint(0, 736)
-        self.position_y[enemy] = random.randint(0, range_in_y)
+    def regenerate_object(self, iteration, first_y_coordinate_range, second_y_coordinate_range, random, position_x = 0,
+                          position_y = 0, maximum_score = 0, infinite = False, minimum_score = 0):
+
+        if infinite:
+
+            if  game.score > maximum_score:
+                self.position_x[iteration] = random.randint(0, 736)
+                self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
 
 
-class Bullet(MovableObject):
+        elif random and minimum_score == 0 and maximum_score == 0:
+            self.position_x[iteration] = random.randint(0, 736)
+            self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
 
-    # Function that initializes the attributes of this class.
-    def __init__(self, quantity, position_x, position_y, position_x_change, position_y_change, visible, image):
-        super().__init__(quantity, position_x, position_y, position_x_change, position_y_change, image)
+        elif not random and minimum_score == 0 and maximum_score == 0:
+            self.position_x[iteration] = position_x
+            self.position_y[iteration] = position_y
 
-        # This attribute determines if the bullet is visible or not.
-        self.visible = visible
-
-        self.sound = mixer.Sound('blaster.mp3')
-
-    # Function that force the object to follow the player in the X axis.
-    def follow_ship(self, iteration, position_x_change, position_y_change):
-
-        # This line update the value of the bullet at the same position of the ship in the X axis.
-        """Remember that the index [-1], calls the last element in the list"""
-        self.position_x[iteration] = player.position_x[-1] + position_x_change
-
-        # This line update the value of the bullet at the same position of the ship in the Y axis.
-        self.position_y[iteration] = 518
-        self.position_y_change[iteration] = position_y_change
-
-    # Function that updates the change in the Y axis of the bullet by -30 pixels
-    def shoot(self, iteration):
-        self.position_y_change[iteration] = -12
+        else:
+            if minimum_score <= game.score <= maximum_score:
+                self.position_x[iteration] = random.randint(0, 736)
+                self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
 
 
-class DestructionSprites(Bullet):
 
-    # Function that initializes the attributes of this class.
-    def __init__(self, quantity, position_x, position_y, position_x_change, position_y_change, visible, frame01,
-                 frame02, frame03, frame04):
-
-        super().__init__(quantity, position_x, position_y, position_x_change, position_y_change, visible, frame01)
-
-        self.frame02 = frame02
-        self.frame03 = frame03
-        self.frame04 = frame04
 
 
 class Timer:
@@ -237,11 +175,132 @@ class Menu:
         self.exit_color = color
         self.try_again = color
 
-        ''' self.option_color = option_color'''
-
     def display_text(self, font, message, position_x, position_y, color):
         text = font.render(message, True, color)
         game.screen.blit(text, (position_x, position_y))
+
+
+class Player(MovableObject):
+
+    # Function that initializes the attributes of this class.
+    def __init__(self, quantity, initial_position_x, initial_position_y, position_x_change, position_y_change, image):
+
+        """
+        super(). calls a function from the parent class, in this case "__init__". So, what function __init__
+        from player class does, is call the function __init__ from its parent class. Summarizing, __init__
+        function from player class is the same as the parent __init__ function.
+        """
+        super().__init__(quantity, initial_position_x, initial_position_y, position_x_change, position_y_change, image)
+
+        self.frame02 = pygame.image.load('sprites_player1.png')
+        self.death_sound = mixer.Sound('death_sound_effect.mp3')
+        self.death_sound.set_volume(0.7)
+
+    def stand_by(self, iteration):
+
+        # Updating the attribute to NOT change the X position of the player.
+        self.position_x_change[iteration] = 0
+
+    # Function that limits player movement within the screen limitations
+    def stop_player_right(self, iteration):
+
+        # Setting the limit for the player in the screen on the right side.
+        self.position_x[iteration] = 734
+
+    # Function that limits player movement within the screen limitations
+    def stop_player_left(self, iteration):
+
+        # Setting the limit for the player in the screen on the left side.
+        self.position_x[iteration] = 0
+
+
+class Enemy(MovableObject):
+
+    # Function that initializes the attributes of this class.
+    def __init__(self, quantity, initial_position_x, initial_position_y, position_x_change, position_y_change, image):
+        super().__init__(quantity, initial_position_x, initial_position_y, position_x_change, position_y_change, image)
+
+
+    ''' "enemy" is a parameter you'll see often when I'm dealing with enemies functions, it is just
+    the parameter I assign when working with an instance of Enemy class'''
+    # Function that updates the current Y axis coordinates by 0.3 pixels every time it is called.
+    def move_down(self, enemy):
+        self.position_y[enemy] += self.position_y_change[enemy]
+
+    # Function that give a new random coordinates to the enemy within the given parameters below.
+    def regenerate_object(self, iteration, first_y_coordinate_range, second_y_coordinate_range, maximum_score = 0, infinite = False,
+                          minimum_score = 0):
+
+        if infinite:
+
+            if  game.score > maximum_score:
+                self.position_x[iteration] = random.randint(0, 736)
+                self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
+
+
+        elif minimum_score == 0 and maximum_score == 0:
+            self.position_x[iteration] = random.randint(0, 736)
+            self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
+
+        else:
+            if minimum_score <= game.score <= maximum_score:
+                self.position_x[iteration] = random.randint(0, 736)
+                self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
+
+
+
+class Bullet(MovableObject):
+
+    # Function that initializes the attributes of this class.
+    def __init__(self, quantity, initial_position_x, initial_position_y,
+                 position_x_change, position_y_change, visible, image):
+        super().__init__(quantity, initial_position_x, initial_position_y, position_x_change, position_y_change, image)
+
+        # This attribute determines if the bullet is visible or not.
+        self.visible = visible
+
+        # Attribute that stores shooting sound.
+        self.sound = mixer.Sound('blaster.mp3')
+
+    # Function that force the object to follow the player in the X axis.
+    def follow_ship(self, iteration, position_x_change, position_y_change):
+
+        # This line update the value of the bullet at the same position of the ship in the X axis.
+        """Remember that the index [-1], calls the last element in the list"""
+        self.position_x[iteration] = player.position_x[-1] + position_x_change
+
+        # This line update the value of the bullet at the same position of the ship in the Y axis.
+        self.position_y[iteration] = 518
+        self.position_y_change[iteration] = position_y_change
+
+    # Function that updates the change in the Y axis of the bullet by -30 pixels
+    def shoot(self, iteration, new_change_in_y):
+
+        self.position_y_change[iteration] = new_change_in_y
+
+
+class Meteor(Bullet):
+
+    def __init__(self, quantity, initial_position_x, initial_position_y, position_x_change, position_y_change, visible,
+                 image):
+
+        super().__init__(quantity, initial_position_x, initial_position_y, position_x_change, position_y_change,
+                         visible, image)
+
+
+
+class DestructionSprites(Bullet):
+
+    # Function that initializes the attributes of this class.
+    def __init__(self, quantity, initial_position_x, initial_position_y, position_x_change,
+                 position_y_change, visible, frame01, frame02, frame03, frame04):
+
+        super().__init__(quantity, initial_position_x, initial_position_y, position_x_change, position_y_change,
+                         visible, frame01)
+
+        self.frame02 = frame02
+        self.frame03 = frame03
+        self.frame04 = frame04
 
 
 class Game(Menu):
@@ -324,9 +383,14 @@ game = Game(True, pygame.font.Font('advanced_pixel_lcd-7.ttf', 40), (255, 255, 2
 
 player = Player(1, 368, 518, 0, 0, pygame.image.load('sprites_player0.png'))
 enemies = Enemy(7,
-                [random.randint(0, 736) for enemy in range(9)],
-                [random.randint(0, 200) for enemy in range(9)],
-                0.8, 0.13, pygame.image.load('space-ship.png'))
+                [random.randint(0, 736) for enemy in range(7)],
+                [random.randint(0, 200) for enemy in range(7)],
+                1.0, 0.2, pygame.image.load('space-ship.png'))
+
+meteors = Meteor(2,
+                [random.randint(0, 736) for asteroid in range(5)],
+                [random.randint(-256, -128) for asteroid in range(5)],
+                0, 0.2, False, pygame.image.load('asteroide_128_X_128.png'))
 
 bullet = Bullet(1,
                 0, 518, 0,
