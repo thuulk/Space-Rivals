@@ -1,13 +1,16 @@
 # Module created to define and store classes of Space_Heroic source code
+import random
 
-from classes import game, bullet, enemies, player, timer
+from classes import game, bullet, enemies, player, timer, meteors
 from pygame import mixer
 import pygame
 import math
 
 
+# Function that initialize everything required for the game to run.
 def initialize():
 
+    # Initialize pygame.
     pygame.init()
 
     # Initialize music and main theme
@@ -21,23 +24,27 @@ def initialize():
 
     # Respawning enemies and player
     for enemy in range(enemies.quantity):
-        enemies.regenerate(enemy, 200)
+        enemies.regenerate_object(enemy, 0, 200, True)
 
     for iteration in range(player.quantity):
-        player.regenerate_object(iteration, 368, 518)
-        bullet.position_y_change[iteration] = 0
+        player.regenerate_object(iteration, 0, 0, False, 368, 518)
+        bullet.visible = False
+
+    for meteor in range(meteors.quantity):
+        meteors.regenerate_object(meteor, 0, 0, False, random.randint(0, 736), random.randint(-256, -128))
 
     # Resetting score
     game.score = 0
 
 
+# Function that resets the music to the beginning.
 def reinitialize_music():
 
     mixer.music.stop()
     mixer.music.play()
 
 
-# Hitbox function
+# Hitbox function.
 def hitbox(position_x_1, position_y_1, position_x_2, position_y_2, distance_pixels):
 
     bullet_n_enemy_distance = math.sqrt(math.pow(position_x_1 - position_x_2, 2) +
@@ -50,11 +57,14 @@ def hitbox(position_x_1, position_y_1, position_x_2, position_y_2, distance_pixe
         return False
 
 
+# Function that contains the block code that conforms the main menu.
 def game_menu():
+
+    # Displaying the background, game title, and the options the user can choose (play or exit the game).
     game.screen.blit(game.background, (0, 0))
-    game.menu.display_text(game.menu.title_font, "Space Invaders", 100, 200, game.menu.default_color)
+    game.menu.display_text(game.menu.title_font, "Space Heroic", 145, 200, game.menu.default_color)
     game.menu.display_text(game.menu.option_font, "Play", 145, 350, game.menu.play_color)
-    game.menu.display_text(game.menu.option_font, "Quit", 145, 400, game.menu.exit_color)
+    game.menu.display_text(game.menu.option_font, "Exit", 145, 400, game.menu.exit_color)
 
     for event in pygame.event.get():
 
@@ -99,12 +109,12 @@ def in_game_inputs():
             # If the key pressed is "right arrow" or "d", the next block will be executed.
             if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                 for iteration in range(player.quantity):
-                    player.move_to_right(iteration, 2)
+                    player.move_to_right(iteration, 1.8)
 
             # If the key pressed is "left arrow" or "a", the next block will be executed.
             if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                 for iteration in range(player.quantity):
-                    player.move_to_left(iteration, -2)
+                    player.move_to_left(iteration, -1.8)
 
             # If the key pressed is space, the next block will be executed.
             if event.key == pygame.K_SPACE:
@@ -112,17 +122,23 @@ def in_game_inputs():
                 for iteration in range(bullet.quantity):
                     bullet.visible = True
                     bullet.sound.play()
-                    bullet.shoot(iteration)
+                    bullet.shoot(iteration, -12)
 
+        # This is an event I set to be called every millisecond.
         if event.type == pygame.USEREVENT:
             timer.update_time()
 
 
+# # Function that makes every specified object to move.
 def movable_objects():
+
+    # Displaying the background image on the screen.
+    game.screen.blit(game.background, (0, 0))
 
     # Player functions -------------------------------------------------------------------------------------------------
     for iteration in range(player.quantity):
 
+        # Updating the player's position.
         player.update_position(iteration, player.image_path)
 
         # If the position in the X axis of the player is 0 or below, the next block will be executed.
@@ -136,32 +152,40 @@ def movable_objects():
     # Enemies functions ------------------------------------------------------------------------------------------------
     for enemy in range(enemies.quantity):
 
+        # Updating enemies' position.
         enemies.update_position(enemy, enemies.image_path)
 
-        # Updating the position of the enemy
+        # Updating the position of the enemy whenever they hit the screen limits.
         if enemies.position_x[enemy] >= 736:
-            enemies.move_to_left(enemy, -0.8)
+            enemies.move_to_left(enemy, -1)
             enemies.move_down(enemy)
 
         if enemies.position_x[enemy] <= 0:
-            enemies.move_to_right(enemy, 0.8)
+            enemies.move_to_right(enemy, 1)
             enemies.move_down(enemy)
 
+        # Ending the game due to a enemy ship passing through the player.
         if enemies.position_y[enemy] >= 550:
             game.over = True
             game.execute = False
 
         # Collisions ---------------------------------------------------------------------------------------------------
         for iteration in range(bullet.quantity):
-            enemies.update_position(enemy, enemies.image_path)
 
-            # Collision between the bullet and the enemy and between the player and the enemy.
+
+            # Storaging the collision between the bullet and the enemy and between the player and the enemy.
             collision_bullet_n_enemy = hitbox(enemies.position_x[enemy], enemies.position_y[enemy],
-                                              bullet.position_x[iteration], bullet.position_y[iteration], 27)
+                                              bullet.position_x[iteration], bullet.position_y[iteration],
+                                              28)
 
-            # Collision between the bullet and the enemy and between the player and the enemy.
+            # Storaging the collision between the bullet and the enemy and between the player and the enemy.
             collision_player_n_enemy = hitbox(enemies.position_x[enemy], enemies.position_y[enemy],
-                                              player.position_x[iteration], player.position_y[iteration], 60)
+                                              player.position_x[iteration], player.position_y[iteration],
+                                              60)
+
+            collision_player_n_meteor = hitbox(player.position_x[iteration], player.position_y[iteration],
+                                               meteors.position_x[iteration], meteors.position_y[iteration],
+                                               100)
 
             # If there is a collision between the bullet and an enemy, the next block will be executed.
             if collision_bullet_n_enemy:
@@ -169,19 +193,31 @@ def movable_objects():
                 game.destruction_sound.play()
                 game.update_score()
 
-                if game.score < 200:
-                    enemies.regenerate(enemy, 200)
+                # Difficulty curve
+                enemies.regenerate_object(enemy, 0, 200, 500, False, 0)
+                enemies.regenerate_object(enemy, 0, 225, 1000, False, 500)
+                enemies.regenerate_object(enemy, 0, 250, 1500, False, 1000)
+                enemies.regenerate_object(enemy, 0, 275, 2000, False, 1500)
+                enemies.regenerate_object(enemy, 0, 300, 2000, True)
 
-                if game.score > 200:
-                    enemies.regenerate(enemy, 300)
 
+
+                # Bullet won't be longer visible until space key is pressed again.
                 bullet.visible = False
 
+            # If there is a collision between the player and an enemy, the next block will be executed.
             if collision_player_n_enemy:
 
+                # Ending the game and activating the game over screen.
                 game.execute = False
-                game.destruction_sprite.visible = False
                 game.over = True
+
+            if collision_player_n_meteor:
+
+                # Ending the game and activating the game over screen.
+                game.execute = False
+                game.over = True
+
 
     # Bullet functions -------------------------------------------------------------------------------------------------
     for iteration in range(bullet.quantity):
@@ -196,15 +232,58 @@ def movable_objects():
 
         # If bullet position in the Y axis is below -64 pixels, the next block will be executed.
         if bullet.position_y[iteration] <= -64:
+
+            # Bullet is no longer visible until space key is pressed again.
             bullet.visible = False
 
-            # In this Y coordinate, the bullet is hidden by the player sprite.
+            # In this Y coordinate the bullet reappears.
             bullet.position_y[iteration] = 518
+
+    # Meteors ----------------------------------------------------------------------------------------------------------
+
+
+    # if score is greater than 470 points, the next block will be executed.
+    if game.score > 20:
+
+        for meteor in range(1):
+            if game.score % 30 == 0:
+
+                if not meteors.visible:
+                    meteors.regenerate_object(meteor, 0, 0, False, random.randint(0, 736), -128)
+                    meteors.visible = True
+
+            if meteors.visible:
+                meteors.shoot(meteor, 2)
+                meteors.update_position(meteor, meteors.image_path)
+
+                if meteors.position_y[meteor] >= 826:
+                    meteors.visible = False
+
+    '''if game.score > 30:
+
+        for meteor in range(meteors.quantity):
+            if game.score % 30 == 0:
+
+                if not meteors.visible:
+                    meteors.regenerate_object(meteor, 0, 0, False, random.randint(0, 736), -128)
+                    meteors.visible = True
+
+            if meteors.visible:
+                meteors.shoot(meteor, 2)
+                meteors.update_position(meteor, meteors.image_path)
+
+                if meteors.position_y[meteor] >= 826:
+                    meteors.visible = False'''
+
+
 
 
 def game_over():
 
+    # Stopping the music.
     mixer.music.stop()
+
+    # Setting the background to a black image.
     game.screen.fill((0, 0, 0))
 
     for iteration in range(game.destruction_sprite.quantity):
@@ -268,3 +347,4 @@ def game_over():
                 exit()
 
     pygame.display.flip()
+
