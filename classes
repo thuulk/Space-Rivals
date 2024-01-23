@@ -404,3 +404,4 @@ bullet = Bullet(1,
                 0, False, pygame.image.load('laser_player.png'))
 
 timer = Timer()
+
