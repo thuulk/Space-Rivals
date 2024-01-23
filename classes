@@ -21,23 +21,18 @@ class MovableObject:
         self.quantity = quantity
 
         # Image.
-        self.image_path_parameter = image_path_parameter
         self.image_path = []
 
         # Initial X position.
-        self.initial_position_x_parameter = position_x_parameter
         self.position_x = []
 
         # Initial Y position.
-        self.initial_position_y_parameter = position_y_parameter
         self.position_y = []
 
         # Attribute that will indicate the change in the X position.
-        self.position_x_change = position_x_change_parameter
         self.position_x_change = []
 
         # This attribute determines how many pixels the position will change in the Y axis.
-        self.position_y_change_parameter = position_y_change_parameter
         self.position_y_change = []
 
         # Loop that will convert every parameter given into the instance in a class attribute.
@@ -257,10 +252,19 @@ class Bullet(MovableObject):
         super().__init__(quantity, initial_position_x, initial_position_y, position_x_change, position_y_change, image)
 
         # This attribute determines if the bullet is visible or not.
-        self.visible = visible
+        self.visible = []
 
         # Attribute that stores shooting sound.
         self.sound = mixer.Sound('blaster.mp3')
+
+        for iteration in range(self.quantity):
+
+            if isinstance(visible, list):
+                self.visible.append(visible[iteration])
+
+            else:
+                self.visible.append(visible)
+
 
     # Function that force the object to follow the player in the X axis.
     def follow_ship(self, iteration, position_x_change, position_y_change):
@@ -282,10 +286,12 @@ class Bullet(MovableObject):
 class Meteor(Bullet):
 
     def __init__(self, quantity, initial_position_x, initial_position_y, position_x_change, position_y_change, visible,
-                 image):
+                 image, visible01):
 
         super().__init__(quantity, initial_position_x, initial_position_y, position_x_change, position_y_change,
                          visible, image)
+
+        self.visible01 = visible01
 
 
 
@@ -388,9 +394,10 @@ enemies = Enemy(7,
                 1.0, 0.2, pygame.image.load('space-ship.png'))
 
 meteors = Meteor(2,
-                [random.randint(0, 736) for asteroid in range(5)],
-                [random.randint(-256, -128) for asteroid in range(5)],
-                0, 0.2, False, pygame.image.load('asteroide_128_X_128.png'))
+                [random.randint(0, 736) for asteroid in range(2)],
+                [random.randint(-256, -128) for asteroid in range(2)],
+                0, 0.2, False,
+                 pygame.image.load('asteroide_128_X_128.png'), False)
 
 bullet = Bullet(1,
                 0, 518, 0,
