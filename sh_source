@@ -3,11 +3,13 @@ from classes import game, timer
 import pygame
 
 
+# Function that executes the entire game.
 def running():
 
     # While this attribute is true, the next block will be executed.
     while game.reset:
 
+        # Calling the function that initialize the game
         initialize()
 
         # While this attribute is true, the next block will be executed.
@@ -37,11 +39,16 @@ def running():
             # Updating the screen.
             pygame.display.flip()
 
+        # Resetting timer to 0.
         timer.reset()
+
+        # While game.over attribute is true, the next block will be executed.
         while game.over:
 
             game_over()
 
+        # Initialize the game again regardless of the user choice of keep playing or not.
         initialize()
+
 
 running()
