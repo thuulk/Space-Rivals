@@ -5,6 +5,7 @@ import pygame
 
 def running():
 
+    # While this attribute is true, the next block will be executed.
     while game.reset:
 
         initialize()
@@ -12,20 +13,23 @@ def running():
         # While this attribute is true, the next block will be executed.
         while game.menu.execute:
 
+            # Execute game_menu function.
             game_menu()
 
+        # Reinitialize music and timer after the player exits the main menu and start playing.
         reinitialize_music()
         timer.reset()
 
         # While this attribute is true execute the next block.
         while game.execute:
 
-            # Displaying the background image on the screen.
-            game.screen.blit(game.background, (0, 0))
-
-            # These are all the functions that make the game work.
+            # Function that reads the user's inputs.
             in_game_inputs()
+
+            # Function that makes every specified object to move.
             movable_objects()
+
+            # Score functions.
             game.show_score()
             game.show_best_score()
             game.new_best_score()
@@ -38,5 +42,6 @@ def running():
 
             game_over()
 
+        initialize()
 
 running()
