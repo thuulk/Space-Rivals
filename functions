@@ -1,4 +1,4 @@
-# Module created to define and store classes of Space_Heroic source code
+# Module created to define and store functions of Space_Heroic source code
 import random
 
 from classes import game, bullet, enemies, player, timer, meteors
@@ -240,40 +240,39 @@ def movable_objects():
             bullet.position_y[iteration] = 518
 
     # Meteors ----------------------------------------------------------------------------------------------------------
+    # if score is greater than 750 points, but lower than 1500 points, the next block will be executed.
+    if 750 < game.score <= 1500:
 
+        for iteration in range(1):
 
-    # if score is greater than 470 points, the next block will be executed.
-    if game.score > 20:
-
-        for meteor in range(1):
-            if game.score % 30 == 0:
-
-                if not meteors.visible:
-                    meteors.regenerate_object(meteor, 0, 0, False, random.randint(0, 736), -128)
-                    meteors.visible = True
+            if not meteors.visible:
+                meteors.regenerate_object(iteration, 0, 0, False, random.randint(0, 736), -128)
+                meteors.visible = True
 
             if meteors.visible:
-                meteors.shoot(meteor, 2)
-                meteors.update_position(meteor, meteors.image_path)
+                meteors.shoot(iteration, 2)
+                meteors.update_position(iteration, meteors.image_path)
 
-                if meteors.position_y[meteor] >= 826:
-                    meteors.visible = False
+            if meteors.position_y[iteration] >= 826:
+                meteors.visible = False
 
-    '''if game.score > 30:
+    if 1500 < game.score:
+        for iteration in range(2):
 
-        for meteor in range(meteors.quantity):
-            if game.score % 30 == 0:
-
-                if not meteors.visible:
-                    meteors.regenerate_object(meteor, 0, 0, False, random.randint(0, 736), -128)
-                    meteors.visible = True
+            if not meteors.visible:
+                meteors.regenerate_object(iteration, 0, 0, False, random.randint(0, 736),
+                                          random.randint(-256, -128))
+                meteors.visible = True
 
             if meteors.visible:
-                meteors.shoot(meteor, 2)
-                meteors.update_position(meteor, meteors.image_path)
+                meteors.shoot(iteration, 2)
+                meteors.update_position(iteration, meteors.image_path)
 
-                if meteors.position_y[meteor] >= 826:
-                    meteors.visible = False'''
+            if meteors.position_y[0] and meteors.position_y[1] >= 826:
+                meteors.visible = False
+
+
+
 
 
 
@@ -347,4 +346,3 @@ def game_over():
                 exit()
 
     pygame.display.flip()
-
