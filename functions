@@ -13,6 +13,10 @@ def initialize():
     # Initialize pygame.
     pygame.init()
 
+    # Setting the title and icon screen.
+    pygame.display.set_caption('Space Heroic')
+    pygame.display.set_icon(game.icon)
+
     # Initialize music
     pygame.mixer.init()
     mixer.music.load('corneria.mp3')
