@@ -66,7 +66,6 @@ class MovableObject:
     # Function that updates the coordinates of the object in the X axis.
     def update_position(self, iteration, path):
 
-
         if isinstance(path, list):
             self.position_x[iteration] += self.position_x_change[iteration]
             self.position_y[iteration] += self.position_y_change[iteration]
@@ -94,15 +93,14 @@ class MovableObject:
         self.position_y[iteration] = position_y
         '''
     # Function that give a new random coordinates to the enemy within the given parameters below.
-    def regenerate_object(self, iteration, first_y_coordinate_range, second_y_coordinate_range, random, position_x = 0,
-                          position_y = 0, maximum_score = 0, infinite = False, minimum_score = 0):
+    def regenerate_object(self, iteration, first_y_coordinate_range, second_y_coordinate_range, random, position_x=0,
+                          position_y=0, maximum_score=0, infinite=False, minimum_score=0):
 
         if infinite:
 
-            if  game.score > maximum_score:
+            if game.score > maximum_score:
                 self.position_x[iteration] = random.randint(0, 736)
                 self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
-
 
         elif random and minimum_score == 0 and maximum_score == 0:
             self.position_x[iteration] = random.randint(0, 736)
@@ -116,9 +114,6 @@ class MovableObject:
             if minimum_score <= game.score <= maximum_score:
                 self.position_x[iteration] = random.randint(0, 736)
                 self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
-
-
-
 
 
 class Timer:
@@ -215,7 +210,6 @@ class Enemy(MovableObject):
     def __init__(self, quantity, initial_position_x, initial_position_y, position_x_change, position_y_change, image):
         super().__init__(quantity, initial_position_x, initial_position_y, position_x_change, position_y_change, image)
 
-
     ''' "enemy" is a parameter you'll see often when I'm dealing with enemies functions, it is just
     the parameter I assign when working with an instance of Enemy class'''
     # Function that updates the current Y axis coordinates by 0.3 pixels every time it is called.
@@ -223,15 +217,14 @@ class Enemy(MovableObject):
         self.position_y[enemy] += self.position_y_change[enemy]
 
     # Function that give a new random coordinates to the enemy within the given parameters below.
-    def regenerate_object(self, iteration, first_y_coordinate_range, second_y_coordinate_range, maximum_score = 0, infinite = False,
-                          minimum_score = 0):
+    def regenerate_object(self, iteration, first_y_coordinate_range, second_y_coordinate_range, maximum_score=0,
+                          infinite=False, minimum_score=0):
 
         if infinite:
 
-            if  game.score > maximum_score:
+            if game.score > maximum_score:
                 self.position_x[iteration] = random.randint(0, 736)
                 self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
-
 
         elif minimum_score == 0 and maximum_score == 0:
             self.position_x[iteration] = random.randint(0, 736)
@@ -241,7 +234,6 @@ class Enemy(MovableObject):
             if minimum_score <= game.score <= maximum_score:
                 self.position_x[iteration] = random.randint(0, 736)
                 self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
-
 
 
 class Bullet(MovableObject):
@@ -264,7 +256,6 @@ class Bullet(MovableObject):
 
             else:
                 self.visible.append(visible)
-
 
     # Function that force the object to follow the player in the X axis.
     def follow_ship(self, iteration, position_x_change, position_y_change):
@@ -292,7 +283,6 @@ class Meteor(Bullet):
                          visible, image)
 
         self.visible01 = visible01
-
 
 
 class DestructionSprites(Bullet):
@@ -387,16 +377,16 @@ class Game(Menu):
 game = Game(True, pygame.font.Font('advanced_pixel_lcd-7.ttf', 40), (255, 255, 255),
             (87, 35, 100))
 
-player = Player(1, 368, 518, 0, 0, pygame.image.load('sprites_player0.png'))
-enemies = Enemy(7,
-                [random.randint(0, 736) for enemy in range(7)],
-                [random.randint(0, 200) for enemy in range(7)],
-                1.0, 0.2, pygame.image.load('space-ship.png'))
+player = Player(1, 368, 518, 0, 0,
+                pygame.image.load('sprites_player0.png'))
 
-meteors = Meteor(2,
-                [random.randint(0, 736) for asteroid in range(2)],
-                [random.randint(-256, -128) for asteroid in range(2)],
-                0, 0.2, False,
+
+enemies = Enemy(7, [random.randint(0, 736) for enemy in range(7)],
+                [random.randint(0, 200) for enemy in range(7)], 0.26, 0.048,
+                pygame.image.load('space-ship.png'))
+
+meteors = Meteor(2, [random.randint(0, 736) for asteroid in range(2)],
+                 [random.randint(-256, -128) for asteroid in range(2)], 0, 0, False,
                  pygame.image.load('asteroide_128_X_128.png'), False)
 
 bullet = Bullet(1,
@@ -404,4 +394,3 @@ bullet = Bullet(1,
                 0, False, pygame.image.load('laser_player.png'))
 
 timer = Timer()
-
