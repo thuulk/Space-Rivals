@@ -14,7 +14,7 @@ def initialize():
     pygame.init()
 
     # Setting the title and icon screen.
-    pygame.display.set_caption('Space Heroic')
+    pygame.display.set_caption('Space Rivals')
     pygame.display.set_icon(game.icon)
 
     # Initialize music
@@ -69,7 +69,7 @@ def game_menu():
 
     # Displaying the background, game title, and options (Play and exit) texts.
     game.screen.blit(game.background, (0, 0))
-    game.menu.display_text(game.menu.title_font, "Space Heroic", 145, 200, game.menu.default_color)
+    game.menu.display_text(game.menu.title_font, "Space Rivals", 145, 200, game.menu.default_color)
     game.menu.display_text(game.menu.option_font, "Play", 145, 350, game.menu.play_color)
     game.menu.display_text(game.menu.option_font, "Exit", 145, 400, game.menu.exit_color)
 
