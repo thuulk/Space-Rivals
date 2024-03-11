@@ -28,7 +28,7 @@ def initialize():
 
     # Respawning enemies.
     for enemy in range(enemies.quantity):
-        enemies.regenerate_object(enemy, 0, 200, True)
+        enemies.respawn(enemy, 0, 200, True)
 
     # Respawning player.
     for iteration in range(player.quantity):
@@ -53,7 +53,8 @@ def reinitialize_music():
 # Hitbox function.
 def hitbox(position_x_1, position_y_1, position_x_2, position_y_2, distance_pixels):
 
-    collision = math.sqrt(math.pow(position_x_1 - position_x_2, 2) + math.pow(position_y_1 - position_y_2, 2))
+    collision = math.sqrt(math.pow(position_x_1 - position_x_2, 2) +
+                                        math.pow(position_y_1 - position_y_2, 2))
 
     # If collision is lower than distance_pixels, return True
     if collision < distance_pixels:
@@ -123,12 +124,12 @@ def in_game_inputs():
             # If the key pressed is "right arrow" or "d", the player will move to the right by 1.8 pixels.
             if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                 for iteration in range(player.quantity):
-                    player.move_to_right(iteration, 0.45)
+                    player.move_to_right(iteration, 1.8)
 
             # If the key pressed is "left arrow" or "a", the player will move to the left by 1.8 pixels.
             if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                 for iteration in range(player.quantity):
-                    player.move_to_left(iteration, -0.45)
+                    player.move_to_left(iteration, -1.8)
 
             # If the key pressed is space, the next block will be executed.
             if event.key == pygame.K_SPACE:
@@ -142,7 +143,7 @@ def in_game_inputs():
                     bullet.sound.play()
 
                     # calling the function that updates position_y_change attribute from 0 to -12.
-                    bullet.shoot(iteration, -4)
+                    bullet.shoot(iteration, -12)
 
         # This is an event I set to be called every millisecond.
         if event.type == pygame.USEREVENT:
@@ -177,12 +178,12 @@ def movable_objects():
 
         # Updating the position of the enemy whenever they hit the screen limits.
         if enemies.position_x[enemy] >= 736:
-            enemies.move_to_left(enemy, -0.26)
+            enemies.move_to_left(enemy, -1)
             enemies.move_down(enemy)
 
         # Updating the position of the enemy whenever they hit the screen limits.
         if enemies.position_x[enemy] <= 0:
-            enemies.move_to_right(enemy, 0.26)
+            enemies.move_to_right(enemy, 1)
             enemies.move_down(enemy)
 
         # Ending the game because an enemy ship passing through the player.
@@ -206,7 +207,7 @@ def movable_objects():
             # Storing the collision between the player and the meteor.
             collision_player_n_meteor = hitbox(player.position_x[iteration], player.position_y[iteration],
                                                meteors.position_x[iteration], meteors.position_y[iteration],
-                                               80)
+                                               100)
 
             # If there is a collision between the bullet and an enemy, the next block will be executed.
             if collision_bullet_n_enemy:
@@ -221,11 +222,11 @@ def movable_objects():
                 game.update_score()
 
                 # Difficulty curve
-                enemies.regenerate_object(enemy, 0, 200, 500, False, 0)
-                enemies.regenerate_object(enemy, 0, 225, 1000, False, 500)
-                enemies.regenerate_object(enemy, 0, 250, 1500, False, 1000)
-                enemies.regenerate_object(enemy, 0, 275, 2000, False, 1500)
-                enemies.regenerate_object(enemy, 0, 300, 2000, True)
+                enemies.respawn(enemy, 0, 200, 2500, False, 0 )
+                enemies.respawn(enemy, 0, 225, 3000, False, 2500)
+                enemies.respawn(enemy, 0, 250, 3500, False, 3000)
+                enemies.respawn(enemy, 0, 275, 4000, False, 3500)
+                enemies.respawn(enemy, 0, 300, 4500, True)
 
                 # Bullet won't be longer visible until space key is pressed again.
                 bullet.visible = False
@@ -237,6 +238,7 @@ def movable_objects():
                 game.execute = False
                 game.over = True
 
+            # If there is a collision between the player and a meteor, the next block will be executed.
             if collision_player_n_meteor:
 
                 # Ending the game and activating the game over screen.
@@ -272,7 +274,7 @@ def movable_objects():
 
     # Meteors ----------------------------------------------------------------------------------------------------------
     # if score is greater than 750 points, but lower than 1500 points, the next block will be executed.
-    if 740 < game.score <= 1500:
+    if 750 < game.score <= 1500:
 
         # for each meteor in one iteration, execute:
         for iteration in range(1):
@@ -281,15 +283,14 @@ def movable_objects():
             if not meteors.visible:
 
                 # Generating the meteor
-                meteors.regenerate_object(iteration, 0, 0, False, random.randint(0, 736),
-                                          random.randint(-256, -128))
+                meteors.regenerate_object(iteration, -256, -128, True)
 
                 # Setting to true the value that triggers the meteor to move.
                 meteors.visible = True
 
             # If meteors.visible attribute is true, the next block will be executed.
             if meteors.visible:
-                meteors.shoot(iteration, 0.75)
+                meteors.shoot(iteration, 2)
                 meteors.update_position(iteration, meteors.image_path)
 
             # If the meteor Y coordinate is greater or equal to 826, execute the following block.
@@ -305,7 +306,7 @@ def movable_objects():
     if 1500 < game.score:
 
         ''' This block does the same as the one above, with the slight difference that this one generates two meteors 
-        instead of one '''
+        instead of one. '''
         for iteration in range(2):
 
             if not meteors.visible:
@@ -314,12 +315,11 @@ def movable_objects():
                 meteors.visible = True
 
             if meteors.visible:
-                meteors.shoot(iteration, 0.75)
+                meteors.shoot(iteration, 2)
                 meteors.update_position(iteration, meteors.image_path)
 
             if meteors.position_y[0] and meteors.position_y[1] >= 826:
                 meteors.visible = False
-
 
 # Game over function.
 def game_over():
@@ -417,4 +417,5 @@ def game_over():
                 exit()
 
     pygame.display.flip()
+
 
