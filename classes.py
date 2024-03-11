@@ -66,6 +66,7 @@ class MovableObject:
     # Function that updates the coordinates of the object in the X axis.
     def update_position(self, iteration, path):
 
+        # If the path given is a list, execute the next code block.
         if isinstance(path, list):
             self.position_x[iteration] += self.position_x_change[iteration]
             self.position_y[iteration] += self.position_y_change[iteration]
@@ -92,21 +93,28 @@ class MovableObject:
         self.position_x[iteration] = position_x
         self.position_y[iteration] = position_y
         '''
-    # Function that give a new random coordinates to the enemy within the given parameters below.
-    def regenerate_object(self, iteration, first_y_coordinate_range, second_y_coordinate_range, random, position_x=0,
-                          position_y=0, maximum_score=0, infinite=False, minimum_score=0):
 
+    # Function that give a new random coordinates to the enemy within the given parameters below.
+    """Infinite is the parameter that determines if maximum_score parameter should be used for t"""
+    def regenerate_object(self, iteration, first_y_coordinate_range, second_y_coordinate_range, random_bool, position_x = 0,
+                          position_y = 0, maximum_score = 0, infinite = False, minimum_score = 0):
+
+        """ If infinite is true there won't be more updates in difficulty curve in the game, thus I stop comparing
+        the score points between maximum and minimum score, and just executing the respawn when score points are
+        greater than maximum_score parameter """
         if infinite:
 
-            if game.score > maximum_score:
+            if  game.score > maximum_score:
                 self.position_x[iteration] = random.randint(0, 736)
                 self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
 
-        elif random and minimum_score == 0 and maximum_score == 0:
+        # Block called to respawn the meteors between a certain range of score points and Y coordinates.
+        elif random_bool and minimum_score == 0 and maximum_score == 0:
             self.position_x[iteration] = random.randint(0, 736)
             self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
 
-        elif not random and minimum_score == 0 and maximum_score == 0:
+        # Block called to update the player position.
+        elif not random_bool and minimum_score == 0 and maximum_score == 0:
             self.position_x[iteration] = position_x
             self.position_y[iteration] = position_y
 
@@ -114,6 +122,9 @@ class MovableObject:
             if minimum_score <= game.score <= maximum_score:
                 self.position_x[iteration] = random.randint(0, 736)
                 self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
+
+
+
 
 
 class Timer:
@@ -182,6 +193,7 @@ class Player(MovableObject):
         """
         super().__init__(quantity, initial_position_x, initial_position_y, position_x_change, position_y_change, image)
 
+        # Initializing the exclusive attributes of player class
         self.frame02 = pygame.image.load('sprites_player1.png')
         self.death_sound = mixer.Sound('death_sound_effect.mp3')
         self.death_sound.set_volume(0.7)
@@ -210,31 +222,35 @@ class Enemy(MovableObject):
     def __init__(self, quantity, initial_position_x, initial_position_y, position_x_change, position_y_change, image):
         super().__init__(quantity, initial_position_x, initial_position_y, position_x_change, position_y_change, image)
 
-    ''' "enemy" is a parameter you'll see often when I'm dealing with enemies functions, it is just
-    the parameter I assign when working with an instance of Enemy class'''
+
+    # "enemy" is a parameter you'll see often when I'm dealing with enemies functions, I set it for iterations
     # Function that updates the current Y axis coordinates by 0.3 pixels every time it is called.
     def move_down(self, enemy):
         self.position_y[enemy] += self.position_y_change[enemy]
 
     # Function that give a new random coordinates to the enemy within the given parameters below.
-    def regenerate_object(self, iteration, first_y_coordinate_range, second_y_coordinate_range, maximum_score=0,
-                          infinite=False, minimum_score=0):
+    def respawn(self, iteration, first_y_coordinate_range, second_y_coordinate_range, maximum_score=0, infinite=False,
+                          minimum_score=0):
 
+        """ If infinite is true there won't be more updates in difficulty curve in the game, thus I stop comparing
+         the score points between maximum and minimum score, and just executing the respawn when score points are
+         greater than maximum_score parameter """
         if infinite:
 
-            if game.score > maximum_score:
+            if  game.score > maximum_score:
                 self.position_x[iteration] = random.randint(0, 736)
                 self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
 
+        # Resetting the enemies when the game executes or starts over
         elif minimum_score == 0 and maximum_score == 0:
             self.position_x[iteration] = random.randint(0, 736)
             self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
 
+        # Comparing score points with maximum and minimum score parameters for setting the difficulty curve
         else:
             if minimum_score <= game.score <= maximum_score:
                 self.position_x[iteration] = random.randint(0, 736)
                 self.position_y[iteration] = random.randint(first_y_coordinate_range, second_y_coordinate_range)
-
 
 class Bullet(MovableObject):
 
@@ -256,6 +272,7 @@ class Bullet(MovableObject):
 
             else:
                 self.visible.append(visible)
+
 
     # Function that force the object to follow the player in the X axis.
     def follow_ship(self, iteration, position_x_change, position_y_change):
@@ -283,6 +300,7 @@ class Meteor(Bullet):
                          visible, image)
 
         self.visible01 = visible01
+
 
 
 class DestructionSprites(Bullet):
@@ -377,16 +395,16 @@ class Game(Menu):
 game = Game(True, pygame.font.Font('advanced_pixel_lcd-7.ttf', 40), (255, 255, 255),
             (87, 35, 100))
 
-player = Player(1, 368, 518, 0, 0,
-                pygame.image.load('sprites_player0.png'))
+player = Player(1, 368, 518, 0, 0, pygame.image.load('sprites_player0.png'))
+enemies = Enemy(7,
+                [random.randint(0, 736) for enemy in range(7)],
+                [random.randint(0, 200) for enemy in range(7)],
+                1.0, 0.2, pygame.image.load('space-ship.png'))
 
-
-enemies = Enemy(7, [random.randint(0, 736) for enemy in range(7)],
-                [random.randint(0, 200) for enemy in range(7)], 0.26, 0.048,
-                pygame.image.load('space-ship.png'))
-
-meteors = Meteor(2, [random.randint(0, 736) for asteroid in range(2)],
-                 [random.randint(-256, -128) for asteroid in range(2)], 0, 0, False,
+meteors = Meteor(2,
+                [random.randint(0, 736) for asteroid in range(2)],
+                [random.randint(-256, -128) for asteroid in range(2)],
+                0, 0.2, False,
                  pygame.image.load('asteroide_128_X_128.png'), False)
 
 bullet = Bullet(1,
