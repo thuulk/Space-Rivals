@@ -122,16 +122,6 @@ def in_game_inputs():
         # If a key is pressed, the next block will be executed.
         if event.type == pygame.KEYDOWN:
 
-            # If the key pressed is "right arrow" or "d", the player will move to the right by 1.8 pixels.
-            if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                for iteration in range(player.quantity):
-                    player.move_to_right(iteration, 1.8)
-
-            # If the key pressed is "left arrow" or "a", the player will move to the left by 1.8 pixels.
-            if event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                for iteration in range(player.quantity):
-                    player.move_to_left(iteration, -1.8)
-
             # If the key pressed is space, the next block will be executed.
             if event.key == pygame.K_SPACE:
 
@@ -144,11 +134,23 @@ def in_game_inputs():
                     bullet.sound.play()
 
                     # calling the function that updates position_y_change attribute from 0 to -12.
-                    bullet.shoot(iteration, -12)
+                    bullet.shoot(iteration, -28)
 
         # This is an event I set to be called every millisecond.
         if event.type == pygame.USEREVENT:
             timer.update_time()
+
+    # Check held keys every frame for smooth, responsive player movement.
+    keys = pygame.key.get_pressed()
+    for iteration in range(player.quantity):
+        right = keys[pygame.K_RIGHT] or keys[pygame.K_d]
+        left = keys[pygame.K_LEFT] or keys[pygame.K_a]
+        if right and not left:
+            player.move_to_right(iteration, 6.5)
+        elif left and not right:
+            player.move_to_left(iteration, -6.5)
+        else:
+            player.stand_by(iteration)
 
 
 # # Function that makes every specified object to move.
@@ -179,12 +181,12 @@ def movable_objects():
 
         # Updating the position of the enemy whenever they hit the screen limits.
         if enemies.position_x[enemy] >= 736:
-            enemies.move_to_left(enemy, -0.9)
+            enemies.move_to_left(enemy, -3.2)
             enemies.move_down(enemy)
 
         # Updating the position of the enemy whenever they hit the screen limits.
         if enemies.position_x[enemy] <= 0:
-            enemies.move_to_right(enemy, 0.9)
+            enemies.move_to_right(enemy, 3.2)
             enemies.move_down(enemy)
 
         # Ending the game because an enemy ship passing through the player.
@@ -291,7 +293,7 @@ def movable_objects():
 
             # If meteors.visible attribute is true, the next block will be executed.
             if meteors.visible:
-                meteors.shoot(iteration, 2)
+                meteors.shoot(iteration, 6.0)
                 meteors.update_position(iteration, meteors.image_path)
 
             # If the meteor Y coordinate is greater or equal to 826, execute the following block.
@@ -315,7 +317,7 @@ def movable_objects():
                 meteors.visible = True
 
             if meteors.visible:
-                meteors.shoot(iteration, 2)
+                meteors.shoot(iteration, 6.0)
                 meteors.update_position(iteration, meteors.image_path)
 
             if meteors.position_y[0] and meteors.position_y[1] >= 826:
