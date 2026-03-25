@@ -3,6 +3,7 @@ import random
 
 from classes import game, bullet, enemies, player, timer, meteors, meteor, base_dir
 from triple_shot import triple_fire, triple_ready, update_triple_shot
+from power_up import spawn_power_up, update_power_up, triple_shot_active
 from pygame import mixer
 import pygame
 import math
@@ -123,27 +124,28 @@ def in_game_inputs():
         # If a key is pressed, the next block will be executed.
         if event.type == pygame.KEYDOWN:
 
-            # If the key pressed is E and all triple bullets are inactive, fire.
-            if event.key == pygame.K_e and triple_ready():
-                triple_fire()
+            # If the key pressed is space, fire — triple if power-up is active, single otherwise.
+            if event.key == pygame.K_SPACE:
 
-            # If the key pressed is space and the bullet is inactive, fire.
-            if event.key == pygame.K_SPACE and not bullet.visible:
+                if triple_shot_active() and triple_ready():
+                    triple_fire()
 
-                for iteration in range(bullet.quantity):
+                elif not triple_shot_active() and not bullet.visible:
 
-                    # Snap bullet to the player's current position before firing.
-                    bullet.position_x[iteration] = player.position_x[0] + 15
-                    bullet.position_y[iteration] = player.position_y[0]
+                    for iteration in range(bullet.quantity):
 
-                    # Setting to true the attribute that triggers the bullet being shot.
-                    bullet.visible = True
+                        # Snap bullet to the player's current position before firing.
+                        bullet.position_x[iteration] = player.position_x[0] + 15
+                        bullet.position_y[iteration] = player.position_y[0]
 
-                    # Playing the shoot sound.
-                    bullet.sound.play()
+                        # Setting to true the attribute that triggers the bullet being shot.
+                        bullet.visible = True
 
-                    # calling the function that updates position_y_change attribute from 0 to -12.
-                    bullet.shoot(iteration, -25)
+                        # Playing the shoot sound.
+                        bullet.sound.play()
+
+                        # calling the function that updates position_y_change attribute from 0 to -12.
+                        bullet.shoot(iteration, -25)
 
         # This is an event I set to be called every millisecond.
         if event.type == pygame.USEREVENT:
@@ -230,8 +232,11 @@ def movable_objects():
                 # Playing the destruction sound.
                 game.destruction_sound.play()
 
-                # Updating the player's
+                # Updating the player's score.
                 game.update_score()
+
+                # Chance to drop a power-up at the enemy's position.
+                spawn_power_up(enemies.position_x[enemy], enemies.position_y[enemy])
 
                 # Difficulty curve
                 enemies.respawn(enemy, 0, 200, 2500, False, 0 )
@@ -286,6 +291,9 @@ def movable_objects():
 
     # Triple shot ------------------------------------------------------------------------------------------------------
     update_triple_shot()
+
+    # Power-up ---------------------------------------------------------------------------------------------------------
+    update_power_up()
 
     # Meteors ----------------------------------------------------------------------------------------------------------
     # if score is greater than 750 points, but lower than 1500 points, the next block will be executed.

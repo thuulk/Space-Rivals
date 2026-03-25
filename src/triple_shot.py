@@ -1,4 +1,4 @@
-# Triple shot module — fires three bullets from the player's position:
+# Triple shot module — fires three red bullets from the player's position:
 #   center  : 90°  (straight up)
 #   right   : 65°  (upper-right diagonal)
 #   left    : 115° (upper-left diagonal)
@@ -8,14 +8,13 @@ import pygame
 import os
 
 from classes import Bullet, player, game, enemies, bullet, base_dir
+from power_up import spawn_power_up
 
 _SPEED = 18
 _VX = _SPEED * math.cos(math.radians(65))   # ≈  7.61
 _VY = _SPEED * math.sin(math.radians(65))   # ≈ 16.31  (negated when applied)
 
-# Purple bullet surface — replace with a real asset when available
-_img = pygame.Surface((6, 14))
-_img.fill((180, 0, 255))
+_img = pygame.image.load(os.path.join(base_dir, '../images/triple_bala.png'))
 
 bullet_center = Bullet(1, 0, 518, 0, 0, False, _img)
 bullet_right  = Bullet(1, 0, 518, 0, 0, False, _img)
@@ -88,6 +87,9 @@ def update_triple_shot():
                 game.destruction_sound.stop()
                 game.destruction_sound.play()
                 game.update_score()
+
+                # Chance to drop a power-up at the enemy's position.
+                spawn_power_up(enemies.position_x[enemy], enemies.position_y[enemy])
 
                 # Same difficulty curve as the normal bullet
                 enemies.respawn(enemy, 0, 200, 2500, False, 0)
