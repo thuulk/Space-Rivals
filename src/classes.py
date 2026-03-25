@@ -417,7 +417,7 @@ player = Player(1,
 enemies = Enemy(7,
                 [random.randint(0, 736) for enemy in range(7)],
                 [random.randint(0, 200) for enemy in range(7)],
-                0.9, 0.14, pygame.image.load(os.path.join(base_dir,'../images/space-ship.png')))
+                3.2, 0.55, pygame.image.load(os.path.join(base_dir,'../images/space-ship.png')))
 
 meteor = Meteor(1,
                 [random.randint(0, 736) for asteroid in range(2)],
