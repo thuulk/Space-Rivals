@@ -2,6 +2,7 @@
 import random
 
 from classes import game, bullet, enemies, player, timer, meteors, meteor, base_dir
+from triple_shot import triple_fire, triple_ready, update_triple_shot
 from pygame import mixer
 import pygame
 import math
@@ -122,10 +123,18 @@ def in_game_inputs():
         # If a key is pressed, the next block will be executed.
         if event.type == pygame.KEYDOWN:
 
-            # If the key pressed is space, the next block will be executed.
-            if event.key == pygame.K_SPACE:
+            # If the key pressed is E and all triple bullets are inactive, fire.
+            if event.key == pygame.K_e and triple_ready():
+                triple_fire()
+
+            # If the key pressed is space and the bullet is inactive, fire.
+            if event.key == pygame.K_SPACE and not bullet.visible:
 
                 for iteration in range(bullet.quantity):
+
+                    # Snap bullet to the player's current position before firing.
+                    bullet.position_x[iteration] = player.position_x[0] + 15
+                    bullet.position_y[iteration] = player.position_y[0]
 
                     # Setting to true the attribute that triggers the bullet being shot.
                     bullet.visible = True
@@ -134,7 +143,7 @@ def in_game_inputs():
                     bullet.sound.play()
 
                     # calling the function that updates position_y_change attribute from 0 to -12.
-                    bullet.shoot(iteration, -28)
+                    bullet.shoot(iteration, -25)
 
         # This is an event I set to be called every millisecond.
         if event.type == pygame.USEREVENT:
@@ -274,6 +283,9 @@ def movable_objects():
 
             # Resetting the bullet coordinate in Y axis by 518.
             bullet.position_y[iteration] = 518
+
+    # Triple shot ------------------------------------------------------------------------------------------------------
+    update_triple_shot()
 
     # Meteors ----------------------------------------------------------------------------------------------------------
     # if score is greater than 750 points, but lower than 1500 points, the next block will be executed.
