@@ -25,6 +25,9 @@ def running():
         # While this attribute is true execute the next block.
         while game.execute:
 
+            # Capping the game at 60 FPS.
+            timer.clock.tick(60)
+
             # Function that reads the user's inputs.
             in_game_inputs()
 

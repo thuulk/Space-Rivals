@@ -24,8 +24,8 @@ def initialize():
     mixer.music.set_volume(1)
     mixer.music.play(-1)
 
-    # Setting the frame rate in which the screen updates.
-    timer.clock.tick(60)
+    # Load best score from disk once at initialization.
+    game.load_best_score()
 
     # Respawning enemies.
     for enemy in range(enemies.quantity):
@@ -366,10 +366,9 @@ def game_over():
             # Display the fourth sprite of the explosion.
             game.destruction_sprite.update_position(sprite, game.destruction_sprite.frame04)
 
-    # If timer is lower than 1.5 seconds, execute the following block.
-    if timer.seconds < 1.5:
+    # Play death sound only once at the start of the game over sequence.
+    if timer.seconds < 0.05:
 
-        # Play death sound.
         player.death_sound.play()
 
     # If timer is greater than 2 seconds, execute the following block.

@@ -367,12 +367,17 @@ class Game(Menu):
 
             game.screen.blit(text, (10, 10))
 
-    # Function that displays the player best score in any game.
-    def show_best_score(self):
+    # Function that loads the best score from disk once (call only at init).
+    def load_best_score(self):
 
         if self.score_path.exists():
             contents = self.score_path.read_text()
             self.best_score = json.loads(contents)
+
+    # Function that displays the player best score in any game.
+    def show_best_score(self):
+
+        if self.score_path.exists():
             text = self.score_font.render(f"Best score: {self.best_score}", True, (255, 255, 255))
             game.screen.blit(text, (10, 10))
 
@@ -380,6 +385,7 @@ class Game(Menu):
     def new_best_score(self):
 
         if self.score > self.best_score:
+            self.best_score = self.score
             contents = json.dumps(self.score)
             self.score_path.write_text(contents)
 
