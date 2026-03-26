@@ -40,3 +40,15 @@ json/best_score.json
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Sound Forge metadata
+*.sfk
+
+# Database
+*.sqlite3
+
+# Environment variables
+.env
+
+# Django static files
+backend/staticfiles/
