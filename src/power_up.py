@@ -131,27 +131,25 @@ class PowerUp(MovableObject):
             self.activation_ticks = pygame.time.get_ticks()
 
 
-def _recolor_to_reddish(surface):
-    """Shifts the orange orb toward reddish tones by reducing green and boosting red."""
-    result = surface.copy()
-    # Reduce green to push orange toward red.
-    green_reduce = pygame.Surface(result.get_size(), pygame.SRCALPHA)
-    green_reduce.fill((255, 180, 255))
-    result.blit(green_reduce, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
-    # Boost red to intensify the reddish tone.
-    red_boost = pygame.Surface(result.get_size(), pygame.SRCALPHA)
-    red_boost.fill((40, 0, 0))
-    result.blit(red_boost, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
+def _tint_surface(surface, color):
+    """Creates a tinted copy of a surface preserving only the original alpha."""
+    result = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+    for x in range(surface.get_width()):
+        for y in range(surface.get_height()):
+            r, g, b, a = surface.get_at((x, y))
+            if a > 0:
+                result.set_at((x, y), (color[0], color[1], color[2], a))
     return result
 
 
-# Creating the triple shot power-up instance (orange center, reddish borders).
-_reddish_sprite = _recolor_to_reddish(
-    pygame.image.load(os.path.join(base_dir, '../images/power_up.png')).convert_alpha())
+# Creating the triple shot power-up instance (red tint).
+_red_sprite = _tint_surface(
+    pygame.image.load(os.path.join(base_dir, '../images/power_up.png')).convert_alpha(),
+    (255, 80, 80))
 
 power_up = PowerUp(1,
                    0, -64, 0, 3,
-                   _reddish_sprite)
+                   _red_sprite)
 
 
 # Module-level functions that delegate to the power_up instance.

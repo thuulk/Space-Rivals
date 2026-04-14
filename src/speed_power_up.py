@@ -20,17 +20,13 @@ def _recolor_to_yellow(surface):
 
 
 def _tint_surface(surface, color):
-    """Creates a tinted copy of a surface preserving alpha and luminance."""
+    """Creates a tinted copy of a surface preserving only the original alpha."""
     result = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
     for x in range(surface.get_width()):
         for y in range(surface.get_height()):
             r, g, b, a = surface.get_at((x, y))
             if a > 0:
-                gray = (r + g + b) // 3
-                nr = min(255, color[0] * gray // 255)
-                ng = min(255, color[1] * gray // 255)
-                nb = min(255, color[2] * gray // 255)
-                result.set_at((x, y), (nr, ng, nb, a))
+                result.set_at((x, y), (color[0], color[1], color[2], a))
     return result
 
 
