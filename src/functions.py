@@ -2,8 +2,9 @@
 import random
 
 from classes import game, bullet, enemies, player, timer, meteors, meteor, base_dir
-from triple_shot import triple_fire, triple_ready, update_triple_shot
-from power_up import spawn_power_up, update_power_up, triple_shot_active
+from triple_shot import triple_fire, triple_ready, update_triple_shot, reset_triple_shot
+from power_up import spawn_power_up, update_power_up, triple_shot_active, reset_power_up
+from speed_power_up import spawn_speed_power_up, update_speed_power_up, speed_shot_active, reset_speed_power_up, SPEED_MULTIPLIER, yellow_bullet_sprite
 from pygame import mixer
 import pygame
 import math
@@ -44,6 +45,11 @@ def initialize():
 
     # Resetting score
     game.score = 0
+
+    # Resetting power-up, triple shot, and speed power-up states
+    reset_power_up()
+    reset_triple_shot()
+    reset_speed_power_up()
 
 
 # Function that resets the music to the beginning.
@@ -144,8 +150,9 @@ def in_game_inputs():
                         # Playing the shoot sound.
                         bullet.sound.play()
 
-                        # calling the function that updates position_y_change attribute from 0 to -12.
-                        bullet.shoot(iteration, -25)
+                        # Updating bullet speed — 2.5x faster if speed power-up is active.
+                        speed = -25 * SPEED_MULTIPLIER if speed_shot_active() else -25
+                        bullet.shoot(iteration, speed)
 
         # This is an event I set to be called every millisecond.
         if event.type == pygame.USEREVENT:
@@ -238,6 +245,9 @@ def movable_objects():
                 # Chance to drop a power-up at the enemy's position.
                 spawn_power_up(enemies.position_x[enemy], enemies.position_y[enemy])
 
+                # Chance to drop a speed power-up at the enemy's position.
+                spawn_speed_power_up(enemies.position_x[enemy], enemies.position_y[enemy])
+
                 # Difficulty curve
                 enemies.respawn(enemy, 0, 200, 2500, False, 0 )
                 enemies.respawn(enemy, 0, 225, 3000, False, 2500)
@@ -275,8 +285,11 @@ def movable_objects():
         # If the bullet attribute "visible" is true, the next block will be executed.
         if bullet.visible:
 
-            # Calling the function that shoots the bullet by updating its position by -12 pixels in the Y axis.
-            bullet.update_position(iteration, bullet.image_path)
+            # Draw bullet yellow while speed power-up is active, otherwise use the default sprite.
+            if speed_shot_active():
+                bullet.update_position(iteration, yellow_bullet_sprite)
+            else:
+                bullet.update_position(iteration, bullet.image_path)
 
         # If bullet position in the Y axis is below -64 pixels, the next block will be executed.
         if bullet.position_y[iteration] <= -64:
@@ -294,6 +307,9 @@ def movable_objects():
 
     # Power-up ---------------------------------------------------------------------------------------------------------
     update_power_up()
+
+    # Speed power-up ---------------------------------------------------------------------------------------------------
+    update_speed_power_up()
 
     # Meteors ----------------------------------------------------------------------------------------------------------
     # if score is greater than 750 points, but lower than 1500 points, the next block will be executed.

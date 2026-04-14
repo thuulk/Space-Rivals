@@ -7,26 +7,35 @@ import math
 import os
 
 
-# Chance to spawn a power-up when an enemy is destroyed (5%).
-_SPAWN_CHANCE = 0.05
-
-# Duration of the triple shot effect in milliseconds (10 seconds).
-_DURATION_MS = 10_000
-
-
 class PowerUp(MovableObject):
+
+    # List that tracks all power-up instances for mutual exclusivity.
+    _all_instances = []
 
     # Function that initializes the attributes of this class.
     def __init__(self, quantity, initial_position_x, initial_position_y,
-                 position_x_change, position_y_change, image):
+                 position_x_change, position_y_change, image,
+                 center_color=None, border_color=None,
+                 spawn_chance=0.05, duration_ms=10_000):
 
         super().__init__(quantity, initial_position_x, initial_position_y,
                          position_x_change, position_y_change, image)
 
+        # Register this instance for mutual exclusivity between power-ups.
+        PowerUp._all_instances.append(self)
+
+        # Color attributes for customizing the power-up appearance.
+        self.center_color = center_color
+        self.border_color = border_color
+
+        # Spawn chance and effect duration configurable per instance.
+        self.spawn_chance = spawn_chance
+        self.duration_ms = duration_ms
+
         # Attribute that determines if the power-up is visible on screen.
         self.visible = False
 
-        # Attribute that determines if the triple shot effect is currently active.
+        # Attribute that determines if the power-up effect is currently active.
         self.active = False
 
         # Storing the tick when the power-up was collected to track duration.
@@ -35,12 +44,31 @@ class PowerUp(MovableObject):
         # Radius in pixels for detecting collision between the player and the power-up.
         self.hit_radius = 35
 
+        # If colors are provided, build a colored surface for the power-up sprite.
+        if center_color and border_color:
+            self._build_colored_surface()
+
+    # Function that builds a colored surface combining circles with the sprite on top.
+    def _build_colored_surface(self):
+        original = self.image_path[0]
+        orig_w, orig_h = original.get_size()
+        padding = 10
+        size = max(orig_w, orig_h) + padding * 2
+        surface = pygame.Surface((size, size), pygame.SRCALPHA)
+        center = (size // 2, size // 2)
+        pygame.draw.circle(surface, self.border_color, center, size // 2)
+        pygame.draw.circle(surface, self.center_color, center, size // 3)
+        sprite_x = (size - orig_w) // 2
+        sprite_y = (size - orig_h) // 2
+        surface.blit(original, (sprite_x, sprite_y))
+        self.image_path[0] = surface
+
     # Function that attempts to spawn the power-up at the given coordinates with a random chance.
     def spawn(self, position_x, position_y):
 
         """Only one power-up can be on screen at a time, and not while the buff is active."""
         if not self.visible and not self.active:
-            if random.random() < _SPAWN_CHANCE:
+            if random.random() < self.spawn_chance:
                 self.position_x[0] = position_x
                 self.position_y[0] = position_y
                 self.visible = True
@@ -51,7 +79,7 @@ class PowerUp(MovableObject):
         if not self.active:
             return False
 
-        return pygame.time.get_ticks() - self.activation_ticks < _DURATION_MS
+        return pygame.time.get_ticks() - self.activation_ticks < self.duration_ms
 
     # Function that returns the milliseconds left on the active buff (0 if inactive).
     def remaining_ms(self):
@@ -59,7 +87,15 @@ class PowerUp(MovableObject):
         if not self.active:
             return 0
 
-        return max(0, _DURATION_MS - (pygame.time.get_ticks() - self.activation_ticks))
+        return max(0, self.duration_ms - (pygame.time.get_ticks() - self.activation_ticks))
+
+    # Function that resets the power-up to its initial state (used when restarting the game).
+    def reset(self):
+        self.visible = False
+        self.active = False
+        self.activation_ticks = 0
+        self.position_x[0] = 0
+        self.position_y[0] = -64
 
     # Function that updates the power-up each frame: moves, draws, checks collection, and manages timer.
     def update(self):
@@ -85,17 +121,37 @@ class PowerUp(MovableObject):
             math.pow(self.position_x[0] - player.position_x[0], 2) +
             math.pow(self.position_y[0] - player.position_y[0], 2))
 
-        # If the player collects the power-up, activate the triple shot effect.
+        # If the player collects the power-up, activate its effect and deactivate any other active power-up.
         if collision < self.hit_radius:
+            for other in PowerUp._all_instances:
+                if other is not self:
+                    other.active = False
             self.visible = False
             self.active = True
             self.activation_ticks = pygame.time.get_ticks()
 
 
-# Creating the power-up instance.
+def _recolor_to_reddish(surface):
+    """Shifts the orange orb toward reddish tones by reducing green and boosting red."""
+    result = surface.copy()
+    # Reduce green to push orange toward red.
+    green_reduce = pygame.Surface(result.get_size(), pygame.SRCALPHA)
+    green_reduce.fill((255, 180, 255))
+    result.blit(green_reduce, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
+    # Boost red to intensify the reddish tone.
+    red_boost = pygame.Surface(result.get_size(), pygame.SRCALPHA)
+    red_boost.fill((40, 0, 0))
+    result.blit(red_boost, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
+    return result
+
+
+# Creating the triple shot power-up instance (orange center, reddish borders).
+_reddish_sprite = _recolor_to_reddish(
+    pygame.image.load(os.path.join(base_dir, '../images/power_up.png')).convert_alpha())
+
 power_up = PowerUp(1,
                    0, -64, 0, 3,
-                   pygame.image.load(os.path.join(base_dir, '../images/power_up.png')))
+                   _reddish_sprite)
 
 
 # Module-level functions that delegate to the power_up instance.
@@ -109,3 +165,6 @@ def update_power_up():
 
 def triple_shot_active():
     return power_up.is_active()
+
+def reset_power_up():
+    power_up.reset()

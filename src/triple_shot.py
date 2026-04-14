@@ -5,6 +5,7 @@
 
 from classes import Bullet, game, player, enemies, bullet, base_dir
 from power_up import spawn_power_up
+from speed_power_up import spawn_speed_power_up
 import pygame
 import math
 import os
@@ -112,6 +113,9 @@ class TripleShot(Bullet):
                     # Chance to drop a power-up at the enemy's position.
                     spawn_power_up(enemies.position_x[enemy], enemies.position_y[enemy])
 
+                    # Chance to drop a speed power-up at the enemy's position.
+                    spawn_speed_power_up(enemies.position_x[enemy], enemies.position_y[enemy])
+
                     # Difficulty curve (same as regular bullet).
                     enemies.respawn(enemy, 0, 200, 2500, False, 0)
                     enemies.respawn(enemy, 0, 225, 3000, False, 2500)
@@ -122,6 +126,12 @@ class TripleShot(Bullet):
                     # Resetting the bullet.
                     self.reset_bullet(iteration)
                     break
+
+
+    # Function that resets all triple shot bullets to their inactive state (used when restarting the game).
+    def reset(self):
+        for iteration in range(self.quantity):
+            self.reset_bullet(iteration)
 
 
 # Creating the triple shot instance with 3 bullets: left (index 0), center (index 1), and right (index 2).
@@ -142,3 +152,6 @@ def triple_fire():
 
 def update_triple_shot():
     triple_shot.update()
+
+def reset_triple_shot():
+    triple_shot.reset()
